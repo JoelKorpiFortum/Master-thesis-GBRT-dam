@@ -21,7 +21,7 @@ start_time = time.time()
 # Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
 
 features = ['h', 'h_poly', 'Cos_2s', 'Sin_2s', 'Sin_s', 'Cos_s', 't', 'ln_t']
-target = 'MB18'
+target = 'GV1'
 poly_degree = 4
 start_date = "08-01-2020"
 end_date = "03-01-2025"
@@ -34,6 +34,8 @@ difference = relativedelta(date2, date1)
 total_months = difference.years * 12 + difference.months
 
 X, y, dates = preprocess_data(features, target, start_date, end_date, test_size=test_size, poly_degree=poly_degree)
+X.drop(columns=['h'], inplace=True)
+y.drop(columns=['h'], inplace=True)
 X_train, X_test, y_train, y_test, scaler, split_index = split_data_normalized(X, y, test_size=test_size)
 X_all = pd.concat([X_train, X_test])
 
