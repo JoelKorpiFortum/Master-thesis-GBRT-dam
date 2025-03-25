@@ -20,13 +20,13 @@ start_time = time.time()
 
 # Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
 
-features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10',  
-            'h', 'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 
-            'P', 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180',         
-            'T', 'T_MA_001', 'T_MA_007', 
+features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', 'h', \
+            'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 'P', 'P_RS_030', \
+            'P_RS_060', 'P_RS_090', 'P_RS_180', 'T', 'T_MA_001', 'T_MA_007', \
             't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year']
 
-target = ' '
+target = 'MB4'
+features.remove(target)
 poly_degree = 4
 start_date = "08-01-2020"
 end_date = "03-01-2025"
