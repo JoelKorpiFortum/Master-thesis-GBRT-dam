@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
-from utils.data_preparation import preprocess_data, split_data_normalized
+from utils.data_preparation import preprocess_data, split_data_normalized, mapping
 from processing.custom_metrics import willmotts_d, nash_sutcliffe
 
 start_time = time.time()
@@ -22,15 +22,19 @@ start_time = time.time()
 
 features = ['h', 'h_poly', 'Cos_2s', 'Sin_2s', 'Sin_s', 'Cos_s', 't', 'ln_t']
 target = 'GV1'
-poly_degree = 4
-start_date = "08-01-2020"
-end_date = "03-01-2025"
-test_size = 0.3
-separation_date = "10-16-2023" # Date corresponds to split_index
 
-date1 = datetime.strptime(start_date, "%m-%d-%Y")
-date2 = datetime.strptime(separation_date, "%m-%d-%Y")
-difference = relativedelta(date2, date1)
+path = f'./data/LOS_DAMM_{mapping(target)}.csv'
+data = pd.read_csv(path, sep=';', parse_dates=['Date-Time'])
+
+dates = data['Date-Time']
+start_date = dates.iloc[0].date()  # First date (YYYY-MM-DD)
+end_date = dates.iloc[-1].date()  # Last date (YYYY-MM-DD)
+
+poly_degree = 4
+test_size = 0.3
+split_index = int(len(data) * (1 - test_size))
+separation_date = dates.iloc[split_index].date()
+difference = relativedelta(separation_date, start_date)
 total_months = difference.years * 12 + difference.months
 
 X, y, dates = preprocess_data(features, target, start_date, end_date, test_size=test_size, poly_degree=poly_degree)
@@ -87,13 +91,16 @@ with open(f'./visualization/plotting_data/{model_type}/{model_type}_{target}_plo
 end_time = time.time()
 elapsed_time = end_time - start_time
 
+print(f"\n~~~ MODEL ~~~ \n")
 print(f"Model features: {feature_names}")
 print(f"Model Coefficients: {model.coef_}")
+print(f"\n~~~ TEST METRICS ~~~ \n")
 print(f"RMSE_CV: {rmse_cv}")
 print(f"RMSE_train: {rmse_train}")
 print(f"RMSE_test: {rmse_test}")
 print(f"MAE_test: {mae_test}")
 print(f"Willmott's d Test: {d_test}")
 print(f"Nash-Sutcliffe Test: {NSE_test}")
-print(f"{total_months} months")
-print(f"Elapsed time: {elapsed_time:.4f} seconds")
+print(f"\n~~~ OTHER STATS ~~~ \n")
+print(f"Train data length: {total_months} months")
+print(f"Elapsed time: {elapsed_time:.4f} seconds\n")

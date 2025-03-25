@@ -15,21 +15,19 @@ import pickle
 
 # Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
 
-target = 'MB18'
-target_name = mapping(target)
-
-path = f'./data/LOS_DAMM_{target_name}.csv'
+target = 'GV1'
+path = f'./data/LOS_DAMM_{mapping(target)}.csv'
 data = pd.read_csv(path, sep=';', parse_dates=['Date-Time'])
-
-start_date = "08-01-2020"
-end_date = "03-01-2025"
-split_index = 28107
-separation_date = "10-16-2023"
+print(data)
 
 dates = data['Date-Time']
-date1 = datetime.strptime(start_date, "%m-%d-%Y")
-date2 = datetime.strptime(separation_date, "%m-%d-%Y")
-difference = relativedelta(date2, date1)
+start_date = dates.iloc[0].date()  # First date (YYYY-MM-DD)
+end_date = dates.iloc[-1].date()  # Last date (YYYY-MM-DD)
+
+test_size = 0.3
+split_index = int(len(data) * (1 - test_size))
+separation_date = dates.iloc[split_index].date()
+difference = relativedelta(separation_date, start_date)
 total_months = difference.years * 12 + difference.months
 
 lag_num = 24*365 # Seasonality = amount of hours (data points) in a year
@@ -40,8 +38,8 @@ X_train = data[:split_index]
 X_test = data.iloc[split_index:]
 X_all = pd.concat([X_train, X_test])
 
-y_train = X_train[target_name]
-y_test = X_test[target_name]
+y_train = X_train[mapping(target)]
+y_test = X_test[mapping(target)]
 y_all = pd.concat([y_train, y_test])
 
 # Seasonal Naive Forecasting Model (using .shift() to shift by one year)
@@ -75,11 +73,13 @@ plotting_data = {
 
 model_type = 'Naive'
 
-with open(f'./visualization/plotting_data/{model_type}/{model_type}_{target_name}_plotting_data.pkl', 'wb') as f:
+with open(f'./visualization/plotting_data/{model_type}/{model_type}_{target}_plotting_data.pkl', 'wb') as f:
     pickle.dump(plotting_data, f)
 
+print(f"\n~~~ TEST METRICS ~~~ \n")
 print(f"RMSE_test: {rmse_test}")
 print(f"MAE_test: {mae_test}")
 print(f"Willmott's d Test: {d_test}")
 print(f"Nash-Sutcliffe Test: {NSE_test}")
-print(f"{total_months} months")
+print(f"\n~~~ OTHER STATS ~~~ \n")
+print(f"Train data length: {total_months} months")
