@@ -10,13 +10,15 @@ from pathlib import Path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 from processing.custom_metrics import willmotts_d, nash_sutcliffe
+from utils.data_preparation import mapping
 import pickle
 
-# Response_variables = ['h', 'GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
+# Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
 
-target = 'GV3'
+target = 'MB18'
+target_name = mapping(target)
 
-path = f'./data/LOS_DAMM_{target}.csv'
+path = f'./data/LOS_DAMM_{target_name}.csv'
 data = pd.read_csv(path, sep=';', parse_dates=['Date-Time'])
 
 start_date = "08-01-2020"
@@ -38,8 +40,8 @@ X_train = data[:split_index]
 X_test = data.iloc[split_index:]
 X_all = pd.concat([X_train, X_test])
 
-y_train = X_train[target]
-y_test = X_test[target]
+y_train = X_train[target_name]
+y_test = X_test[target_name]
 y_all = pd.concat([y_train, y_test])
 
 # Seasonal Naive Forecasting Model (using .shift() to shift by one year)
@@ -71,7 +73,9 @@ plotting_data = {
     'NSE': NSE_test
 }
 
-with open(f'./visualization/plotting_data/Naive_{target}_plotting_data.pkl', 'wb') as f:
+model_type = 'Naive'
+
+with open(f'./visualization/plotting_data/{model_type}/{model_type}_{target_name}_plotting_data.pkl', 'wb') as f:
     pickle.dump(plotting_data, f)
 
 print(f"RMSE_test: {rmse_test}")

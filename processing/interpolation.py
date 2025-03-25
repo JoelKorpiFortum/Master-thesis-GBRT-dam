@@ -14,7 +14,7 @@ all_dates = pd.date_range(start=start_date, end=end_date, freq='h')
 df_reindexed = df.reindex(all_dates)
 
 # Interpolate
-df_reindexed['MÄTB'] = df_reindexed['MÄTB'].interpolate(method='time') # Switch MÄTB with appropriate
+df_reindexed['x'] = df_reindexed['x'].interpolate(method='time') # Switch x with appropriate measurement
 df_reindexed.reset_index(inplace=True)
 df_reindexed.rename(columns={'index': 'Date'}, inplace=True)
 

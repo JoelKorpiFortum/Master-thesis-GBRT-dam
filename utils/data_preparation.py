@@ -35,6 +35,8 @@ DATASET_MAPPING = {
     'T': 'UTETEMP',
     'T_MA_001': 'derived_temporal', # MA
     'T_MA_007': 'derived_temporal', # MA
+    'T_MA_014': 'derived_temporal', # MA
+    'T_MA_030': 'derived_temporal', # MA
     'P': 'PRECIP',
     'P_RS_030': 'derived_temporal', # RS = RUNNING SUM
     'P_RS_060': 'derived_temporal', # RS 
@@ -61,6 +63,8 @@ DERIVED_FEATURE_BASES = {
     'h_RC_030': 'h',
     'T_MA_001': 'T',
     'T_MA_007': 'T',
+    'T_MA_014': 'T',
+    'T_MA_030': 'T',
     'P_RS_030': 'P',
     'P_RS_060': 'P',
     'P_RS_090': 'P',
@@ -151,13 +155,12 @@ def load_and_merge_data(features, target, start_date, end_date, calibration_size
 
 def apply_transformation(data, base_var, transformation_type, window_size):
     """ Helper function to apply the transformation on train or test data separately."""
-
     if transformation_type == 'RS':  # Running sum
         return data[base_var].rolling(window=window_size, center=False, min_periods=1).sum() #Center=false ensures only current data is used
     elif transformation_type == 'MA':  # Moving average
         return data[base_var].rolling(window=window_size, center=False, min_periods=1).mean()
     elif transformation_type == 'RC':  # Rate of change
-        rolling_mean = data[base_var].rolling(window=window_size, center=False, min_periods=1).mean()
+        rolling_mean = data[base_var].rolling(window=window_size, center=False, min_periods=1).mean() #for stability
         return rolling_mean.pct_change(periods=window_size) * 100
 
 
@@ -311,6 +314,10 @@ def split_data_calibration(X, y, calibration_size=0.2, test_size=0.3, split_inde
     y_test = y.iloc[split_idx_calibration:] if y is not None else None
 
     return X_train, X_calib, X_test, y_train, y_calib, y_test, split_idx
+
+""" Returns correctly mapped feature name according to original signal."""
+def mapping(feature):
+    return DATASET_MAPPING[feature]
 
 
 if __name__ == "__main__":

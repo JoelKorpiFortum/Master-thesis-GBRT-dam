@@ -18,8 +18,10 @@ from processing.custom_metrics import willmotts_d, nash_sutcliffe
 
 start_time = time.time()
 
-features = ['h_poly', 'Cos_2s', 'Sin_2s', 'Sin_s', 'Cos_s', 't', 'ln_t']
-target = 'ÖVY'
+# Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
+
+features = ['h', 'h_poly', 'Cos_2s', 'Sin_2s', 'Sin_s', 'Cos_s', 't', 'ln_t']
+target = 'MB18'
 poly_degree = 4
 start_date = "08-01-2020"
 end_date = "03-01-2025"
@@ -74,7 +76,10 @@ plotting_data = {
     'NSE': NSE_test
 }
 
-with open(f'./visualization/plotting_data/HST_{target}_plotting_data.pkl', 'wb') as f:
+model_type = 'HST'
+
+# Pickle: save the plotting data and model to serial files
+with open(f'./visualization/plotting_data/{model_type}/{model_type}_{target}_plotting_data.pkl', 'wb') as f:
     pickle.dump(plotting_data, f)
 
 end_time = time.time()

@@ -18,11 +18,15 @@ import multiprocessing
 
 start_time = time.time()
 
-features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', 'P', 'T', 't',\
-            'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year', 'T_MA_001', 'T_MA_007', \
-            'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180', 'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030']
+# Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
 
-target = 'MB18_A_D'
+features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10',  
+            'h', 'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 
+            'P', 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180',         
+            'T', 'T_MA_001', 'T_MA_007', 
+            't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year']
+
+target = 'MB18'
 poly_degree = 4
 start_date = "08-01-2020"
 end_date = "03-01-2025"
@@ -42,9 +46,9 @@ param_grid = {
     'max_depth': [3],               # Maximum depth of the tree
     'min_child_weight': [1],        # Minimum sum of instance weight (i.e., the minimum number of samples in a leaf node)
     'subsample': [0.6],             # Fraction of samples to use for training each tree
-    'colsample_bytree': [0.6, 0.8],      # Fraction of features to use for each tree
+    'colsample_bytree': [0.8],      # Fraction of features to use for each tree
     'reg_alpha': [3, 5],               # L1 regularization term
-    'reg_lambda': [5, 7],         # L2 regularization term (similar to your 'l2_regularization')
+    'reg_lambda': [5],         # L2 regularization term (similar to your 'l2_regularization')
     'random_state': [42],           # random state for reproducibility
     'boosting_type': ['gbdt'],      # gbdt or dart, dart takes longer time and works better for more boosting rounds
     'linear_tree' : [True, False]
@@ -122,11 +126,13 @@ plotting_data = {
     'native_labels': fea_labels
 }
 
-# Save the plotting data to a file
-with open(f'./visualization/plotting_data/LightGBM_{target}_plotting_data.pkl', 'wb') as f:
+model_type = 'LightGBM'
+
+# Pickle: save the plotting data and model to serial files
+with open(f'./visualization/plotting_data/{model_type}/{model_type}_{target}_plotting_data.pkl', 'wb') as f:
     pickle.dump(plotting_data, f)
 
-with open(f'./visualization/models/LightGBM_model_{target}.pkl', 'wb') as file:
+with open(f'./visualization/models/{model_type}/{model_type}_model_{target}.pkl', 'wb') as file:
     pickle.dump(model, file)
 
 end_time = time.time()

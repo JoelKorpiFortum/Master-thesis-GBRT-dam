@@ -18,11 +18,15 @@ import multiprocessing
 
 start_time = time.time()
 
-features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', 'P', 'T', 't',\
-            'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year', 'T_MA_001', 'T_MA_007', \
-            'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180', 'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030']
+# Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
 
-target = 'MB8_A_D'
+features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10',  
+            'h', 'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 
+            'P', 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180',         
+            'T', 'T_MA_001', 'T_MA_007', 
+            't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year']
+
+target = ' '
 poly_degree = 4
 start_date = "08-01-2020"
 end_date = "03-01-2025"
@@ -130,11 +134,13 @@ plotting_data = {
     # 'perm_labels':perm_labels
 }
 
-# Save the plotting data to a file
-with open(f'./visualization/plotting_data/XGBoost_{target}_plotting_data.pkl', 'wb') as f:
+model_type = 'XGBoost'
+
+# Pickle: save the plotting data and model to serial files
+with open(f'./visualization/plotting_data/{model_type}/{model_type}_{target}_plotting_data.pkl', 'wb') as f:
     pickle.dump(plotting_data, f)
 
-with open(f'./visualization/models/XGBoost_model_{target}.pkl', 'wb') as file:
+with open(f'./visualization/models/{model_type}/{model_type}_model_{target}.pkl', 'wb') as file:
     pickle.dump(model, file)
 
 end_time = time.time()
