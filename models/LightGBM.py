@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
-from utils.data_preparation import preprocess_data, split_data, mapping
+from utils.data_preparation import preprocess_data, split_data, split_data_calibration, mapping
 from processing.custom_metrics import willmotts_d, nash_sutcliffe
 import multiprocessing
 from scipy.stats import pearsonr
@@ -40,21 +40,25 @@ dates = data['Date-Time']
 start_date = dates.iloc[0].date()  # First date (YYYY-MM-DD)
 end_date = dates.iloc[-1].date()  # Last date (YYYY-MM-DD)
 
-test_size = 0.3
-split_index = int(len(data) * (1 - test_size))
-separation_date = dates.iloc[split_index].date()
-difference = relativedelta(separation_date, start_date)
-total_months = difference.years * 12 + difference.months
+val_size = 0.2
+test_size = 0.2
 
 X, y, dates = preprocess_data(features, target, start_date, end_date, poly_degree=poly_degree, test_size=test_size)
-X_train, X_test, y_train, y_test, split_index = split_data(X, y, test_size=test_size)
-X_all = pd.concat([X_train, X_test])
+X_train, X_val, X_test, y_train, y_val, y_test, split_idx = split_data_calibration(X, y, calibration_size=val_size, test_size=test_size)
+X_all = pd.concat([X_train, X_val, X_test])
 
-tscv = TimeSeriesSplit(n_splits=3, test_size=int(0.1*len(X)))
+separation_date_train = dates.iloc[split_idx[0]].date()
+difference = relativedelta(separation_date_train, start_date)
+total_months = difference.years * 12 + difference.months
+
+# X_train, X_test, y_train, y_test, split_index = split_data(X, y, test_size=test_size)
+X_all = pd.concat([X_train, X_val, X_test])
+
+# tscv = TimeSeriesSplit(n_splits=3, test_size=int(0.1*len(X)))
 
 # 3-fold time series cross validation
 def timecv_model(model, X, y):
-    tfold = TimeSeriesSplit(n_splits=3, test_size=int(0.1*len(X)))
+    tfold = TimeSeriesSplit(n_splits=2, test_size=int(0.1*len(X)))
     pcc_list = []
     for _, (train_index, test_index) in tqdm(enumerate(tfold.split(X), start=1)):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
@@ -81,9 +85,9 @@ sampler = TPESampler(seed=42)
 def objective_lgb(trial):
     """
     The objective function to tune hyperparameters. It evaluate the score on a
-    validation set. This function is used by Optuna, a Bayesian hyperparameter tuning framework.
+    validation set. This function is used by Optuna, a Bayesian tuning framework.
     """
-        
+
     params = {
             'objective': 'regression',
             'verbose': -1,
@@ -101,10 +105,10 @@ def objective_lgb(trial):
             'linear_tree': trial.suggest_categorical('linear_tree', [True, False])
             }
     model = LGBMRegressor(**params)
-    model.fit(X_train, y_train, eval_set = [(X_train, y_train), (X_test, y_test)])
-    pred = model.predict(X_test)
+    model.fit(X_train, y_train, eval_set = [(X_train, y_train), (X_val, y_val)])
+    pred_val = model.predict(X_val) 
+    rmse = np.sqrt(mean_squared_error(y_val, pred_val))
     # pcc = pearsonr(pred, y_test)[0]
-    rmse = np.sqrt(mean_squared_error(pred, y_test))
     return rmse
 
 study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name='hyperparameters_tuning')
@@ -120,12 +124,14 @@ opt_model = LGBMRegressor(**best_params)
 cv_result(opt_model, X, y)
 
 # Predictions
-train_predictions = opt_model.predict(X_train) #type: ignore
-test_predictions = opt_model.predict(X_test) #type: ignore
-all_predictions = opt_model.predict(X_all) #type: ignore
+train_predictions = opt_model.predict(X_train)
+val_predictions = opt_model.predict(X_val)
+test_predictions = opt_model.predict(X_test)
+all_predictions = opt_model.predict(X_all)
 
 # Evaluation
 rmse_train = np.sqrt(mean_squared_error(y_train, train_predictions))
+rmse_val = np.sqrt(mean_squared_error(y_val, val_predictions))
 rmse_test = np.sqrt(mean_squared_error(y_test, test_predictions))
 mae_test = mean_absolute_error(y_test, test_predictions)
 d_test = willmotts_d(y_test, test_predictions)
@@ -145,7 +151,6 @@ perm_idx = perm.importances_mean.argsort() #type: ignore
 perm_importances = perm.importances[perm_idx].T #type: ignore
 perm_labels = actual_feature_names[perm_idx]
 
-
 fea_imp_ = pd.DataFrame({'cols':X_train.columns, 'fea_imp':opt_model.feature_importances_}) #type: ignore
 fea_labels = fea_imp_.loc[fea_imp_.fea_imp > 0].sort_values(by=['fea_imp'], ascending = False)
 
@@ -156,7 +161,8 @@ plotting_data = {
     'dates': dates,
     'actual_y': y,
     'predictions': all_predictions,
-    'split_idx': split_index,
+    'split_index_train': split_idx[0],
+    'split_index_val': split_idx[1],
     'RMSE': rmse_test,
     'MAE': mae_test,
     'WILMOTT': d_test,
@@ -187,6 +193,7 @@ print(f"Best parameters: {best_params}")
 print(f"\n~~~ TEST METRICS ~~~ \n")
 # print(f"RMSE_CV: {rmse_cv}")
 print(f"RMSE_train: {rmse_train}")
+print(f"RMSE_val: {rmse_val}")
 print(f"RMSE_test: {rmse_test}")
 print(f"MAE_test: {mae_test}")
 print(f"Willmott's d Test: {d_test}")
