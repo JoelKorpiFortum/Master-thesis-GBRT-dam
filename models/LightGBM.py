@@ -28,7 +28,7 @@ def process_data_for_target(target, poly_degree=4, test_size=0.3):
     - target: The target variable to predict.
     - poly_degree: The degree of polynomial features to add (default is 4).
     - test_size: Proportion of data to use as test set (default is 0.3).
-    
+
     Returns:
     - X_train, X_test, y_train, y_test, split_index, dates, total_months
     """
@@ -51,7 +51,7 @@ def process_data_for_target(target, poly_degree=4, test_size=0.3):
 
     # Split the data into training and testing sets (Assumes split_data is defined elsewhere)
     X_train, X_test, y_train, y_test, split_index = split_data(X, y, test_size=test_size)
-    
+
     # Concatenate training and test data for full data (if needed)
     X_all = pd.concat([X_train, X_test])
 
@@ -64,9 +64,9 @@ def process_data_for_target(target, poly_degree=4, test_size=0.3):
     return X, y, X_train, X_test, y_train, y_test, X_all, split_index, dates, total_months
 
 
-# Helper function to evaluate 5-fold time series cross validation
+# Helper function to evaluate 3-fold time series cross validation
 def timecv_model(model, X, y):
-    tfold = TimeSeriesSplit(n_splits=5)
+    tfold = TimeSeriesSplit(n_splits=3)
     rmse_list = []  # To store RMSE for each fold
     for _, (train_index, val_index) in tqdm(enumerate(tfold.split(X), start=1)):
         X_train, X_val = X.iloc[train_index], X.iloc[val_index]
@@ -88,7 +88,7 @@ def cv_result(model, X, y):
     return avg_rmse
 
 
-def objective_lgb(trial):
+def objective_lgb(trial, X_train, y_train):
     """
     The objective function to tune hyperparameters. It evaluate the score on a
     validation set. This function is used by Optuna, a Bayesian tuning framework.
@@ -120,16 +120,17 @@ def lgb_tune(X_train, y_train):
     # optuna.logging.set_verbosity(optuna.logging.WARNING)
     sampler = TPESampler(seed=42)
     study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name='hyperparameters_tuning')
-    study_model.optimize(objective_lgb, n_trials = 3)  # type: ignore
-    
+    study_model.optimize(lambda trial: objective_lgb(trial, X_train, y_train), n_trials = 2)  # type: ignore
+
     trial = study_model.best_trial
     best_params = trial.params
     print('Best params from optuna: \n', best_params)
     return best_params
 
+
 def lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all):
     # Fit model
-    opt_model = LGBMRegressor(**best_params)
+    opt_model = LGBMRegressor(**best_params, verbose=-1)
     opt_model.fit(X_train, y_train)
 
     # Predictions
@@ -191,12 +192,12 @@ if __name__ == '__main__':
         with open(f'./visualization/plotting_data/LightGBM/LightGBM_{target}_plotting_data.pkl', 'wb') as f:
             pickle.dump(plotting_data, f)
 
-        opt_model = LGBMRegressor(**best_params)
+        opt_model = LGBMRegressor(**best_params, verbose=-1)
 
         with open(f'./visualization/models/LightGBM/LightGBM_model_{target}.pkl', 'wb') as file:
             pickle.dump(opt_model, file)
 
-        print(f"\n~~~ TARGET ~~~")
+        print("\n~~~ TARGET ~~~")
         print(target)
         print("\n~~~ MODEL ~~~")
         print(f"Best parameters: {best_params}")
