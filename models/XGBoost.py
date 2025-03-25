@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
-from utils.data_preparation import preprocess_data, split_data, split_data_calibration, mapping
+from utils.data_preparation import preprocess_data, split_data_validation, mapping
 from processing.custom_metrics import willmotts_d, nash_sutcliffe
 import multiprocessing
 from scipy.stats import pearsonr
@@ -29,7 +29,7 @@ features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', 'h', \
             'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 'P', 'P_RS_030', \
             'P_RS_060', 'P_RS_090', 'P_RS_180', 'T', 'T_MA_001', 'T_MA_007', \
             't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year']
-target = 'MB4'
+target = 'GV1'
 features.remove(target)
 
 poly_degree = 4
@@ -44,10 +44,10 @@ val_size = 0.2
 test_size = 0.2
 
 X, y, dates = preprocess_data(features, target, start_date, end_date, poly_degree=poly_degree, test_size=test_size)
-X_train, X_val, X_test, y_train, y_val, y_test, split_idx = split_data_calibration(X, y, calibration_size=val_size, test_size=test_size)
+X_train, X_val, X_test, y_train, y_val, y_test, split_idx_val, split_idx_test  = split_data_validation(X, y, validation_size=val_size, test_size=test_size)
 X_all = pd.concat([X_train, X_val, X_test])
 
-separation_date_train = dates.iloc[split_idx[0]].date()
+separation_date_train = dates.iloc[split_idx_val].date()
 difference = relativedelta(separation_date_train, start_date)
 total_months = difference.years * 12 + difference.months
 
@@ -113,7 +113,7 @@ def objective_xgb(trial):
     return rmse
 
 study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name='hyperparameters_tuning')
-study_model.optimize(objective_xgb, n_trials = 30)  # type: ignore
+study_model.optimize(objective_xgb, n_trials = 3)  # type: ignore
 
 trial = study_model.best_trial
 best_params = trial.params
@@ -162,8 +162,8 @@ plotting_data = {
     'dates': dates,
     'actual_y': y,
     'predictions': all_predictions,
-    'split_index_train': split_idx[0],
-    'split_index_val': split_idx[1],
+    'split_index_val': split_idx_val,
+    'split_index_test': split_idx_test,
     'RMSE': rmse_test,
     'MAE': mae_test,
     'WILMOTT': d_test,
