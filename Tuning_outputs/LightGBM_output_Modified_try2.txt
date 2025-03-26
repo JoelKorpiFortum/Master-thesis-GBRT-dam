@@ -1,0 +1,79 @@
+TARGET: GV1
+Best parameters: {'max_depth': 11, 'num_leaves': 3, 'learning_rate': 0.0810267745971908, 'n_estimators': 1192, 'subsample': 0.6729929007037533, 'feature_fraction': 0.9794768410123327, 'min_gain_to_split': 0.03220214106407675, 'reg_alpha': 3.7113310717817387, 'reg_lambda': 2.4861838068618725, 'boosting_type': 'gbdt', 'linear_tree': False}
+RMSE_train: 0.08391620874422864
+RMSE_crossval: (0.7293074533373552, 0.4942656991027142, [0.40141532811210545, 0.3520743158586819, 0.7293074533373552])
+RMSE_test: 0.33292274280184125
+MAE_test: 0.24301596454506866
+Willmott's d Test: 0.9974430056652166
+Nash-Sutcliffe Test: 0.9895299799244459
+Train data length: 38 months
+Trial time: 126.8500 seconds
+
+TARGET: GV3
+Best parameters: {'max_depth': 7, 'num_leaves': 24, 'learning_rate': 0.009543648651605847, 'n_estimators': 2926, 'subsample': 0.7890787651835938, 'feature_fraction': 0.8701462926226824, 'min_gain_to_split': 0.5832145875078226, 'reg_alpha': 2.3029413551241062, 'reg_lambda': 1.4023036354671228, 'boosting_type': 'gbdt', 'linear_tree': False}
+RMSE_train: 0.08535367767176377
+RMSE_crossval: (1.2483926818905076, 0.8844748425851213, [1.0560333083719422, 0.3489985374929142, 1.2483926818905076])
+RMSE_test: 0.6874949632915347
+MAE_test: 0.43337754840645326
+Willmott's d Test: 0.9926862302594333
+Nash-Sutcliffe Test: 0.9714497157180854
+Train data length: 38 months
+Trial time: 245.0214 seconds
+
+TARGET: GV51
+Best parameters: {'max_depth': 9, 'num_leaves': 6, 'learning_rate': 0.06361303058140699, 'n_estimators': 1071, 'subsample': 0.9976509387441286, 'feature_fraction': 0.8979861961235673, 'min_gain_to_split': 0.5369166736461417, 'reg_alpha': 0.8217199651731865, 'reg_lambda': 0.6914513817475265, 'boosting_type': 'gbdt', 'linear_tree': False}
+RMSE_train: 0.12998361102517014
+RMSE_crossval: (0.9571909444955069, 0.7017953067195415, [0.7335843311881833, 0.4146106444749342, 0.9571909444955069])
+RMSE_test: 0.46993144383987406
+MAE_test: 0.32093615519454005
+Willmott's d Test: 0.9970617669033399
+Nash-Sutcliffe Test: 0.9876560721885487
+Train data length: 38 months
+Trial time: 150.8098 seconds
+
+TARGET: MB4
+Best parameters: {'max_depth': 12, 'num_leaves': 5, 'learning_rate': 0.028067157282733665, 'n_estimators': 1479, 'subsample': 0.9820255832110439, 'feature_fraction': 0.45959919699141727, 'min_gain_to_split': 2.5372737258262705, 'reg_alpha': 1.4776565496067726, 'reg_lambda': 3.3890957026497652, 'boosting_type': 'gbdt', 'linear_tree': False}
+RMSE_train: 0.4029945005961714
+RMSE_crossval: (3.9387199919408054, 3.1196042560129906, [3.748010390498979, 1.6720823855991875, 3.9387199919408054])
+RMSE_test: 1.8323805512489508
+MAE_test: 1.1747125315004427
+Willmott's d Test: 0.9413462250867403
+Nash-Sutcliffe Test: 0.8298861874515692
+Train data length: 38 months
+Trial time: 236.2449 seconds
+
+TARGET: MB8
+Best parameters: {'max_depth': 10, 'num_leaves': 9, 'learning_rate': 0.08513396428584266, 'n_estimators': 1139, 'subsample': 0.7005448666230232, 'feature_fraction': 0.2219409743378886, 'min_gain_to_split': 6.39290622230793, 'reg_alpha': 4.412053201388378, 'reg_lambda': 4.092224604847646, 'boosting_type': 'gbdt', 'linear_tree': False}
+RMSE_train: 1.0309714268909465
+RMSE_crossval: (5.838554834301582, 3.8812021512432007, [4.177114684908967, 1.6279369345190524, 5.838554834301582])
+RMSE_test: 2.1821263571290626
+MAE_test: 1.8520012163837039
+Willmott's d Test: 0.39232015981005974
+Nash-Sutcliffe Test: -2.0614400543194793
+Train data length: 38 months
+Trial time: 215.3009 seconds
+
+TARGET: MB10
+Best parameters: {'max_depth': 10, 'num_leaves': 30, 'learning_rate': 0.006865872094120915, 'n_estimators': 936, 'subsample': 0.7711960400397433, 'feature_fraction': 0.3316075999155079, 'min_gain_to_split': 3.3654061596532028, 'reg_alpha': 1.0291300605830591, 'reg_lambda': 3.6290135779033568, 'boosting_type': 'dart', 'linear_tree': False}
+RMSE_train: 1.6781670775631143
+RMSE_crossval: (5.1308376422032245, 4.220621965012747, [4.934243589465411, 5.1308376422032245, 2.5967846633696032])
+RMSE_test: 3.556146117750642
+MAE_test: 2.6233363637861125
+Willmott's d Test: 0.2361299504867579
+Nash-Sutcliffe Test: -6.470989054509151
+Train data length: 38 months
+Trial time: 1252.4880 seconds
+
+TARGET: MB18
+Best parameters: {'max_depth': 3, 'num_leaves': 23, 'learning_rate': 0.033825337481891406, 'n_estimators': 566, 'subsample': 0.7977090076559558, 'feature_fraction': 0.9585234406933804, 'min_gain_to_split': 0.4148296285017591, 'reg_alpha': 2.590803205844968, 'reg_lambda': 4.595811504221438, 'boosting_type': 'gbdt', 'linear_tree': False}
+RMSE_train: 1.144959322328703
+RMSE_crossval: (4.9659198261410005, 3.6464400897550084, [4.2805184049608185, 1.6928820381632066, 4.9659198261410005])
+RMSE_test: 3.9933347990452948
+MAE_test: 3.1831949886702238
+Willmott's d Test: 0.7872553226612925
+Nash-Sutcliffe Test: 0.008837442162645703
+Train data length: 38 months
+Trial time: 221.0438 seconds
+
+Total elapsed time: 2447.7589 seconds
+

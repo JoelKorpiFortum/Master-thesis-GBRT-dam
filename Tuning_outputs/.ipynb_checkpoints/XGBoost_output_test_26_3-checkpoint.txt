@@ -1,0 +1,79 @@
+TARGET: GV1
+Best parameters: {'n_estimators': 2270, 'learning_rate': 0.002068243584637287, 'max_depth': 10, 'max_leaves': 26, 'colsample_bytree': 0.6061695553391381, 'subsample': 0.5909124836035503, 'reg_alpha': 0.9170225492671691, 'reg_lambda': 1.5212112147976886, 'gamma': 2.6237821581611893}
+RMSE_train: 0.08223438238361788
+RMSE_crossval: (0.6614630039400307, 0.5505313947957288, [0.48235537999701844, 0.24893537911343297, 0.9203034252767349])
+RMSE_test: 0.273698574591439
+MAE_test: 0.20410508050845697
+Willmott's d Test: 0.9982544208838527
+Nash-Sutcliffe Test: 0.9929237094300658
+Train data length: 38 months
+Trial time: 17.0454 seconds
+
+TARGET: GV3
+Best parameters: {'n_estimators': 2270, 'learning_rate': 0.002068243584637287, 'max_depth': 10, 'max_leaves': 26, 'colsample_bytree': 0.6061695553391381, 'subsample': 0.5909124836035503, 'reg_alpha': 0.9170225492671691, 'reg_lambda': 1.5212112147976886, 'gamma': 2.6237821581611893}
+RMSE_train: 0.10264418785007226
+RMSE_crossval: (1.0348600772069696, 0.8820266633954915, [0.9294334362117085, 0.3251751778743476, 1.3914713761004183])
+RMSE_test: 0.6648168469832604
+MAE_test: 0.4335836860799953
+Willmott's d Test: 0.9930135735012835
+Nash-Sutcliffe Test: 0.9733022029128114
+Train data length: 38 months
+Trial time: 20.4653 seconds
+
+TARGET: GV51
+Best parameters: {'n_estimators': 2270, 'learning_rate': 0.002068243584637287, 'max_depth': 10, 'max_leaves': 26, 'colsample_bytree': 0.6061695553391381, 'subsample': 0.5909124836035503, 'reg_alpha': 0.9170225492671691, 'reg_lambda': 1.5212112147976886, 'gamma': 2.6237821581611893}
+RMSE_train: 0.11983786620760582
+RMSE_crossval: (0.9020058325698513, 0.8316834101149858, [0.9381152779376776, 0.49084346744274204, 1.0660914849645375])
+RMSE_test: 0.4237773122761143
+MAE_test: 0.3055207091484588
+Willmott's d Test: 0.9975604716605693
+Nash-Sutcliffe Test: 0.9899617093285623
+Train data length: 38 months
+Trial time: 19.1795 seconds
+
+TARGET: MB4
+Best parameters: {'n_estimators': 2270, 'learning_rate': 0.002068243584637287, 'max_depth': 10, 'max_leaves': 26, 'colsample_bytree': 0.6061695553391381, 'subsample': 0.5909124836035503, 'reg_alpha': 0.9170225492671691, 'reg_lambda': 1.5212112147976886, 'gamma': 2.6237821581611893}
+RMSE_train: 0.3353611708706813
+RMSE_crossval: (3.462277021604126, 3.193367807552939, [3.6783276176016555, 1.812043950666934, 4.089731854390228])
+RMSE_test: 1.7190609745486456
+MAE_test: 1.1268460645733618
+Willmott's d Test: 0.9501913435873182
+Nash-Sutcliffe Test: 0.850276216424199
+Train data length: 38 months
+Trial time: 22.4344 seconds
+
+TARGET: MB8
+Best parameters: {'n_estimators': 2270, 'learning_rate': 0.002068243584637287, 'max_depth': 10, 'max_leaves': 26, 'colsample_bytree': 0.6061695553391381, 'subsample': 0.5909124836035503, 'reg_alpha': 0.9170225492671691, 'reg_lambda': 1.5212112147976886, 'gamma': 2.6237821581611893}
+RMSE_train: 0.9299546711157436
+RMSE_crossval: (4.350174964440633, 3.647486873050107, [3.9502040396848357, 1.0024760684469591, 5.989780511018526])
+RMSE_test: 2.230919279669436
+MAE_test: 1.5667243807502225
+Willmott's d Test: 0.4025258884657573
+Nash-Sutcliffe Test: -2.1998799362867696
+Train data length: 38 months
+Trial time: 24.2224 seconds
+
+TARGET: MB10
+Best parameters: {'n_estimators': 1436, 'learning_rate': 0.09507192349792752, 'max_depth': 8, 'max_leaves': 19, 'colsample_bytree': 0.5780093202212182, 'subsample': 0.5779972601681014, 'reg_alpha': 0.2904180608409973, 'reg_lambda': 4.330880728874676, 'gamma': 3.005575058716044}
+RMSE_train: 0.3743303522185292
+RMSE_crossval: (5.201804314151227, 4.9381436703641315, [5.817012482987782, 5.0181689060527415, 3.9792496220518707])
+RMSE_test: 3.3393332458192475
+MAE_test: 2.4351458903338683
+Willmott's d Test: 0.22365758217273168
+Nash-Sutcliffe Test: -5.587769998205199
+Train data length: 38 months
+Trial time: 13.9214 seconds
+
+TARGET: MB18
+Best parameters: {'n_estimators': 1436, 'learning_rate': 0.09507192349792752, 'max_depth': 8, 'max_leaves': 19, 'colsample_bytree': 0.5780093202212182, 'subsample': 0.5779972601681014, 'reg_alpha': 0.2904180608409973, 'reg_lambda': 4.330880728874676, 'gamma': 3.005575058716044}
+RMSE_train: 0.3985588870048597
+RMSE_crossval: (3.633256678834718, 2.973720012174077, [1.9943420197041553, 1.7546424491085275, 5.172175567709547])
+RMSE_test: 3.9909101823922177
+MAE_test: 3.314719540226395
+Willmott's d Test: 0.8320130069336114
+Nash-Sutcliffe Test: 0.010040676951250216
+Train data length: 38 months
+Trial time: 13.7865 seconds
+
+Total elapsed time: 131.0550 seconds
+
