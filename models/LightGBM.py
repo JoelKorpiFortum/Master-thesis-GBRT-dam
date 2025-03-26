@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
-from utils.data_preparation import preprocess_data, split_data, split_data_validation, mapping
+from utils.data_preparation import preprocess_data, split_data, mapping
 from processing.custom_metrics import willmotts_d, nash_sutcliffe
 from tqdm import tqdm  # progress bar
 
@@ -115,12 +115,12 @@ def objective_lgb(trial, X_train, y_train):
     return avg_rmse
 
 
-def lgb_tune(X_train, y_train):
+def lgb_tune(target, X_train, y_train, n_trials):
     # Uncomment to suppress optuna log messages
     # optuna.logging.set_verbosity(optuna.logging.WARNING)
     sampler = TPESampler(seed=42)
-    study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name='hyperparameters_tuning')
-    study_model.optimize(lambda trial: objective_lgb(trial, X_train, y_train), n_trials = 2)  # type: ignore
+    study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name=f'hyperparameters_tuning_{target}')
+    study_model.optimize(lambda trial: objective_lgb(trial, X_train, y_train), n_trials = n_trials)  # type: ignore
 
     trial = study_model.best_trial
     best_params = trial.params
@@ -163,12 +163,15 @@ def lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all):
 if __name__ == '__main__':
     start_time = time.time()
     Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
+    output_lines = []  # List to store output for each target
     for target in Response_variables:
-        print(f"TARGET: {target}")
+        start_trial_time = time.time()
+        output_lines.append(f"TARGET: {target}\n")  # Add target header
         poly_degree = 4
         test_size = 0.3
+        n_trials = 2
         X, y, X_train, X_test, y_train, y_test, X_all, split_index, dates, total_months = process_data_for_target(target=target, poly_degree=poly_degree, test_size=test_size)
-        best_params = lgb_tune(X_train, y_train)
+        best_params = lgb_tune(target, X_train, y_train, n_trials)
         all_predictions, rmse_train, rmse_test, mae_test, d_test, NSE_test = lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all)
         
         plotting_data = {
@@ -210,6 +213,28 @@ if __name__ == '__main__':
         print("\n~~~ OTHER STATS ~~~")
         print(f"Train data length: {total_months} months")
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"Elapsed time: {elapsed_time:.4f} seconds\n")
+        # Append each piece of information to the output list
+        output_lines.append(f"Best parameters: {best_params}\n")
+        output_lines.append(f"RMSE_train: {rmse_train}\n")
+        output_lines.append(f"RMSE_test: {rmse_test}\n")
+        output_lines.append(f"MAE_test: {mae_test}\n")
+        output_lines.append(f"Willmott's d Test: {d_test}\n")
+        output_lines.append(f"Nash-Sutcliffe Test: {NSE_test}\n")
+        output_lines.append(f"Train data length: {total_months} months\n")
+
+        end_trial_time = time.time()
+        trial_time = end_trial_time - start_trial_time
+        print(f"Trial time: {trial_time:.4f} seconds\n")
+        output_lines.append(f"Trial time: {trial_time:.4f} seconds\n")
+        output_lines.append("\n")  # Add an empty line for separation
+    
+    final_time = time.time()
+    elapsed_time = final_time - start_time
+    print(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
+    output_lines.append(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
+    output_lines.append("\n")  # Add an empty line for separation
+    # Write all metrics to a text file
+    with open("LightGBM_output.txt", "w") as file:
+        file.writelines(output_lines)
+
+    print("Output saved to LightGBM_output.txt")

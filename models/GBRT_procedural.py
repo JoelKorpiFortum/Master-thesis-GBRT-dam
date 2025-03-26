@@ -7,7 +7,7 @@ import optuna
 from optuna.samplers import TPESampler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.inspection import permutation_importance
-from sklearn.model_selection import GridSearchCV, TimeSeriesSplit, cross_val_score
+from sklearn.model_selection import TimeSeriesSplit
 from dateutil.relativedelta import relativedelta
 import time
 import pickle
@@ -77,23 +77,35 @@ def timecv_model(model, X, y):
     return rmse_list
 
 
-def cv_result(model, X, y):
+def cv_result(model, X, y, penalty_factor=0.3):
     model_name = model.__class__.__name__
-    rmse_ = timecv_model(model, X, y)
-    for i, rmse in enumerate(rmse_):
+    rmse_list = timecv_model(model, X, y)
+    
+    for i, rmse in enumerate(rmse_list):
         print(f'{i+1}th fold: {model_name} RMSE: {rmse:.4f}')
-    avg_rmse = np.mean(rmse_)
+
+    avg_rmse = np.mean(rmse_list)
+    max_rmse = np.max(rmse_list)
+    
     print(f'\n{model_name} average RMSE: {avg_rmse:.4f}')
-    return avg_rmse
+    print(f'{model_name} worst RMSE: {max_rmse:.4f}')
+
+    # Directly combine the average and maximum RMSE
+    penalty = penalty_factor * (max_rmse - avg_rmse)
+    total_loss = avg_rmse + penalty
+    print(f'Corresponding penalty value: {total_loss:.4f}')
+    
+    return total_loss, avg_rmse, rmse_list
 
 
-def objective_gbrt(trial, X_train, y_train):
+def objective_gbrt(trial, X_train, y_train, penalty_factor):
     """
     The objective function to tune hyperparameters. It evaluate the score on a
     validation set. This function is used by Optuna, a Bayesian tuning framework.
     """
 
     params = {
+            # 'eval_metric': 'rmse',
             'verbose': 0,
             'random_state': 42,
             'max_iter': trial.suggest_int('max_iter', 500, 3000),
@@ -106,23 +118,23 @@ def objective_gbrt(trial, X_train, y_train):
             }
     
     model = HistGradientBoostingRegressor(**params)
-    avg_rmse = cv_result(model, X_train, y_train)
-    return avg_rmse
+    total_loss, avg_rmse, _ = cv_result(model, X_train, y_train, penalty_factor)
+    return total_loss
 
 
-def gbrt_tune(X_train, y_train):
+def gbrt_tune(target, X_train, y_train, n_trials, penalty_factor):
     # Uncomment to suppress optuna log messages
     # optuna.logging.set_verbosity(optuna.logging.WARNING)
     sampler = TPESampler(seed=42)
-    study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name='hyperparameters_tuning')
-    study_model.optimize(lambda trial: objective_gbrt(trial, X_train, y_train), n_trials = 2)  # type: ignore
+    study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name=f'hyperparameters_tuning_{target}')
+    study_model.optimize(lambda trial: objective_gbrt(trial, X_train, y_train, penalty_factor), n_trials = n_trials)  # type: ignore
 
     trial = study_model.best_trial
     best_params = trial.params
     print('Best params from optuna: \n', best_params)
     return best_params
 
-def gbrt_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all):
+def gbrt_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor):
     # Fit model
     opt_model = HistGradientBoostingRegressor(**best_params)
     opt_model.fit(X_train, y_train)
@@ -134,11 +146,12 @@ def gbrt_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all):
 
     # Evaluation
     rmse_train = np.sqrt(mean_squared_error(y_train, train_predictions))
+    rmse_crossval = cv_result(opt_model, X_train, y_train, penalty_factor)
     rmse_test = np.sqrt(mean_squared_error(y_test, test_predictions))
     mae_test = mean_absolute_error(y_test, test_predictions)
     d_test = willmotts_d(y_test, test_predictions)
     NSE_test = nash_sutcliffe(y_test, test_predictions)
-    return all_predictions, rmse_train, rmse_test, mae_test, d_test, NSE_test
+    return all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, d_test, NSE_test
 
 # # Compute train/test scores
 # train_score = -opt_model.train_score_
@@ -157,14 +170,18 @@ def gbrt_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all):
 if __name__ == '__main__':
     start_time = time.time()
     Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
+    output_lines = []  # List to store output for each target
     for target in Response_variables:
-        print(f"TARGET: {target}")
+        start_trial_time = time.time()
+        output_lines.append(f"TARGET: {target}\n")  # Add target header
         poly_degree = 4
         test_size = 0.3
+        n_trials = 2
+        penalty_factor = 0.3
         X, y, X_train, X_test, y_train, y_test, X_all, split_index, dates, total_months = process_data_for_target(target=target, poly_degree=poly_degree, test_size=test_size)
-        best_params = gbrt_tune(X_train, y_train)
-        all_predictions, rmse_train, rmse_test, mae_test, d_test, NSE_test = gbrt_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all)
-
+        best_params = gbrt_tune(target, X_train, y_train, n_trials, penalty_factor)
+        all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, d_test, NSE_test = gbrt_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor)
+        
         plotting_data = {
             'X': X,
             'actual_y': y,
@@ -172,6 +189,7 @@ if __name__ == '__main__':
             'dates': dates,
             'predictions': all_predictions,
             'split_index': split_index,
+            'RMSE_crossval': rmse_crossval,
             'RMSE': rmse_test,
             'MAE': mae_test,
             'WILMOTT': d_test,
@@ -197,6 +215,7 @@ if __name__ == '__main__':
         print(f"Best parameters: {best_params}")
         print("\n~~~ TEST METRICS ~~~")
         print(f"RMSE_train: {rmse_train}")
+        print(f"RMSE_crossval: {rmse_crossval}")
         print(f"RMSE_test: {rmse_test}")
         print(f"MAE_test: {mae_test}")
         print(f"Willmott's d Test: {d_test}")
@@ -204,6 +223,29 @@ if __name__ == '__main__':
         print("\n~~~ OTHER STATS ~~~")
         print(f"Train data length: {total_months} months")
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"Elapsed time: {elapsed_time:.4f} seconds\n")
+        # Append each piece of information to the output list
+        output_lines.append(f"Best parameters: {best_params}\n")
+        output_lines.append(f"RMSE_train: {rmse_train}\n")
+        output_lines.append(f"RMSE_crossval: {rmse_crossval}\n")
+        output_lines.append(f"RMSE_test: {rmse_test}\n")
+        output_lines.append(f"MAE_test: {mae_test}\n")
+        output_lines.append(f"Willmott's d Test: {d_test}\n")
+        output_lines.append(f"Nash-Sutcliffe Test: {NSE_test}\n")
+        output_lines.append(f"Train data length: {total_months} months\n")
+
+        end_trial_time = time.time()
+        trial_time = end_trial_time - start_trial_time
+        print(f"Trial time: {trial_time:.4f} seconds\n")
+        output_lines.append(f"Trial time: {trial_time:.4f} seconds\n")
+        output_lines.append("\n")  # Add an empty line for separation
+
+    final_time = time.time()
+    elapsed_time = final_time - start_time
+    print(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
+    output_lines.append(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
+    output_lines.append("\n")  # Add an empty line for separation
+    # Write all metrics to a text file
+    with open("GBRT_output_test_26_3.txt", "w") as file:
+        file.writelines(output_lines)
+
+    print("Output saved to GBRT_output_test_26_3.txt")
