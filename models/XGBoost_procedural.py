@@ -181,8 +181,8 @@ if __name__ == '__main__':
 
     poly_degree = 4
     test_size = 0.3
-    n_trials = 5
-    penalty_factor = 0.4
+    n_trials = 100
+    penalty_factor = 0.1
 
     for target in Response_variables:
         start_trial_time = time.time()

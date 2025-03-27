@@ -296,7 +296,7 @@ def split_data_normalized(X, y, test_size=0.2, split_index_from_end=None):
     X_test_scaled = scaler.transform(X_test)
     X_test_scaled = pd.DataFrame(X_test_scaled, columns=X_test.columns, index=X_test.index)
 
-    return X_train_scaled, X_test_scaled, y_train, y_test, scaler, split_idx
+    return X_train_scaled, X_test_scaled, y_train, y_test, split_idx, scaler
 
 
 def split_data_validation(X, y, validation_size=0.2, test_size=0.2, split_index_from_end=None):

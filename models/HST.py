@@ -15,7 +15,6 @@ root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 from utils.data_preparation import preprocess_data, split_data_normalized, mapping
 from processing.custom_metrics import willmotts_d, nash_sutcliffe
-
 def process_data_for_target(target, poly_degree=4, test_size=0.3):
     """
     Process data for a given target variable.
@@ -145,12 +144,12 @@ if __name__ == '__main__':
         print(f"Trial time: {trial_time:.4f} seconds\n")
         output_lines.append(f"Trial time: {trial_time:.4f} seconds\n")
         output_lines.append("\n")  # Add an empty line for separation
-    
+
     final_time = time.time()
     elapsed_time = final_time - start_time
     print(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
-    output_lines.append(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
-    output_lines.append("\n")  # Add an empty line for separation
+    output_lines.append(f"Total elapsed time: {elapsed_time:.4f} seconds\n\n")
+
     # Write all metrics to a text file
     with open("HST_output.txt", "w") as file:
         file.writelines(output_lines)
