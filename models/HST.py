@@ -144,12 +144,12 @@ if __name__ == '__main__':
         print(f"Trial time: {trial_time:.4f} seconds\n")
         output_lines.append(f"Trial time: {trial_time:.4f} seconds\n")
         output_lines.append("\n")  # Add an empty line for separation
-    
+
     final_time = time.time()
     elapsed_time = final_time - start_time
     print(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
-    output_lines.append(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
-    output_lines.append("\n")  # Add an empty line for separation
+    output_lines.append(f"Total elapsed time: {elapsed_time:.4f} seconds\n\n")
+
     # Write all metrics to a text file
     with open("HST_output.txt", "w") as file:
         file.writelines(output_lines)
