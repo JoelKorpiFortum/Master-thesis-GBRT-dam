@@ -177,21 +177,23 @@ def xgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, p
 if __name__ == '__main__':
     start_time = time.time()
     Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
-    output_lines = []  # List to store output for each target
+    results = []  # List to store output for each target
 
     poly_degree = 4
     test_size = 0.3
-    n_trials = 100
-    penalty_factor = 0.1
+    n_trials = 5
+    penalty_factor = 0.4
 
     for target in Response_variables:
         start_trial_time = time.time()
-        output_lines.append(f"TARGET: {target}\n")  # Add target header
 
         X, y, X_train, X_test, y_train, y_test, X_all, split_index, dates, total_months = process_data_for_target(target=target, poly_degree=poly_degree, test_size=test_size)
         best_params = xgb_tune(target, X_train, y_train, n_trials, penalty_factor)
         all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, d_test, NSE_test  = xgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor)
         
+        rmse_mean_crossval = rmse_crossval[1]
+        rmse_crossval_folds = rmse_crossval[2]
+
         plotting_data = {
             'X': X,
             'actual_y': y,
@@ -199,7 +201,7 @@ if __name__ == '__main__':
             'dates': dates,
             'predictions': all_predictions,
             'split_index': split_index,
-            'RMSE_crossval': rmse_crossval,
+            'RMSE_crossval': rmse_mean_crossval,
             'RMSE': rmse_test,
             'MAE': mae_test,
             'WILMOTT': d_test,
@@ -224,38 +226,45 @@ if __name__ == '__main__':
         print("\n~~~ MODEL ~~~")
         print(f"Best parameters: {best_params}")
         print("\n~~~ TEST METRICS ~~~")
-        print(f"RMSE_train: {rmse_train}")
-        print(f"RMSE_crossval: {rmse_crossval}")
-        print(f"RMSE_test: {rmse_test}")
-        print(f"MAE_test: {mae_test}")
-        print(f"Willmott's d Test: {d_test}")
-        print(f"Nash-Sutcliffe Test: {NSE_test}")
+        print(f"RMSE_train: {rmse_train:.3f}")
+        print(f"RMSE_crossval: {rmse_mean_crossval:.3f}")
+        print(f"RMSE_test: {rmse_test:.3f}")
+        print(f"MAE_test: {mae_test:.3f}")
+        print(f"Willmott's d Test: {d_test:.3f}")
+        print(f"Nash-Sutcliffe Test: {NSE_test:.3f}")
         print("\n~~~ OTHER STATS ~~~")
         print(f"Train data length: {total_months} months")
-
-        # Append each piece of information to the output list
-        output_lines.append(f"Best parameters: {best_params}\n")
-        output_lines.append(f"RMSE_train: {rmse_train}\n")
-        output_lines.append(f"RMSE_crossval: {rmse_crossval}\n")
-        output_lines.append(f"RMSE_test: {rmse_test}\n")
-        output_lines.append(f"MAE_test: {mae_test}\n")
-        output_lines.append(f"Willmott's d Test: {d_test}\n")
-        output_lines.append(f"Nash-Sutcliffe Test: {NSE_test}\n")
-        output_lines.append(f"Train data length: {total_months} months\n")
+        print(f"penalty_factor: {penalty_factor}")
 
         end_trial_time = time.time()
         trial_time = end_trial_time - start_trial_time
         print(f"Trial time: {trial_time:.4f} seconds\n")
-        output_lines.append(f"Trial time: {trial_time:.4f} seconds\n")
-        output_lines.append("\n")  # Add an empty line for separation
+
+        results.append({
+            'Target': target,
+            'Best Parameters': str(best_params),
+            'RMSE_train': np.round(rmse_train, 3),
+            'RMSE_crossval': np.round(rmse_mean_crossval, 3),
+            'RMSE_test': np.round(rmse_test, 3),
+            'MAE_test': np.round(mae_test, 3),
+            'Willmott\'s d Test': np.round(d_test, 3),
+            'Nash-Sutcliffe Test': np.round(NSE_test, 3),
+            'Train data length (months)': total_months,
+            'Penalty factor': penalty_factor,
+            'Number of trials': n_trials,
+            'Trial time (seconds)': np.round(trial_time, 4)
+        })
+
+    df_results = pd.DataFrame(results)
+    # df_results.to_csv("LightGBM_output_results.csv", index=False)
 
     final_time = time.time()
     elapsed_time = final_time - start_time
     print(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
-    output_lines.append(f"Total elapsed time: {elapsed_time:.4f} seconds\n\n")
-    
-    # Write all metrics to a text file
-    with open("XGBoost_output_test_26_3_pen_01.txt", "w") as file:
-        file.writelines(output_lines)
 
-    print("Output saved to XGBoost_output_test_26_3_pen_01.txt")
+    # Write all metrics to a text file
+    with open(f"./tuning_output/XGBoost/XGBoost_output_test_26_3_pen_{penalty_factor*10:02.0f}.txt", "w") as file:
+        file.writelines(df_results.to_string(index=False))
+        file.write(f"\n\nTotal elapsed time: {elapsed_time:.4f} seconds")
+
+    print(f"Output saved to XGBoost_output_test_26_3_pen_{penalty_factor*10:02.0f}.txt")
