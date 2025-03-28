@@ -109,20 +109,21 @@ def objective_lgb(trial, X_train, y_train, penalty_factor):
             # 'objective': 'regression',
             'verbose': -1,
             'random_state': 42,
+            'n_estimators': trial.suggest_int('n_estimators', 500, 3000),
+            'learning_rate': trial.suggest_float("learning_rate", 1e-5, 0.09901, step=0.001),
             'max_depth': trial.suggest_int('max_depth', 3, 12),
             'num_leaves': trial.suggest_int('num_leaves', 2, 30),
-            'learning_rate': trial.suggest_float("learning_rate", 1e-5, 0.1),
-            'n_estimators': trial.suggest_int('n_estimators', 500, 3000),
-            'subsample': trial.suggest_float('subsample', 0.5, 1),
-            'feature_fraction': trial.suggest_float('feature_fraction', 0.2, 1),
-            "min_gain_to_split": trial.suggest_float("min_gain_to_split", 0, 15),
-            'reg_alpha': trial.suggest_float('reg_alpha', 0, 5),               # L1 regularization term
-            'reg_lambda': trial.suggest_float('reg_lambda', 0, 5),             # L2 regularization term (similar to your 'l2_regularization')
-            # 'boosting_type': trial.suggest_categorical('boosting_type', ['gbdt', 'dart']),
+            'subsample': trial.suggest_float('subsample', 0.5, 1, step=0.01),
+            'feature_fraction': trial.suggest_float('feature_fraction', 0.2, 1, step=0.01),
+            "min_gain_to_split": trial.suggest_float("min_gain_to_split", 0, 15, step=0.01),
+            'reg_alpha': trial.suggest_float('reg_alpha', 0, 10, step=0.01),               # L1 regularization term
+            'reg_lambda': trial.suggest_float('reg_lambda', 0, 10, step=0.01),             # L2 regularization term (similar to your 'l2_regularization')
+            'boosting_type': trial.suggest_categorical('boosting_type', ['gbdt', 'dart']),
             'linear_tree': trial.suggest_categorical('linear_tree', [True, False])
             }
     model = LGBMRegressor(**params)
     total_loss, avg_rmse, _ = cv_result(model, X_train, y_train, penalty_factor)
+    del model
     return total_loss
 
 
@@ -136,6 +137,7 @@ def lgb_tune(target, X_train, y_train, n_trials, penalty_factor):
     trial = study_model.best_trial
     best_params = trial.params
     print('Best params from optuna: \n', best_params)
+    del study_model
     return best_params
 
 def lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor):
@@ -178,8 +180,8 @@ if __name__ == '__main__':
 
     poly_degree = 4
     test_size = 0.3
-    n_trials = 5
-    penalty_factor = 0.4
+    n_trials = 50
+    penalty_factor = 0.0
 
     for target in Response_variables:
         start_trial_time = time.time()

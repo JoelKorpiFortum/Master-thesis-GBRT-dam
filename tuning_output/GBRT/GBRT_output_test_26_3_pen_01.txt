@@ -1,0 +1,79 @@
+TARGET: GV1
+Best parameters: {'max_iter': 1258, 'learning_rate': 0.08803434383861893, 'max_depth': 2, 'min_samples_leaf': 24, 'l2_regularization': 1.8448578699079028, 'max_features': 0.8724599690936072, 'early_stopping': 'auto'}
+RMSE_train: 0.05918383764785317
+RMSE_crossval: (0.5167835915117237, 0.5044207377600584, [0.6195003211904776, 0.2657126168129854, 0.6280492752767122])
+RMSE_test: 0.29722594402537544
+MAE_test: 0.2335817724180793
+Willmott's d Test: 0.9979922547512695
+Nash-Sutcliffe Test: 0.9916548525090662
+Train data length: 38 months
+Trial time: 397.1132 seconds
+
+TARGET: GV3
+Best parameters: {'max_iter': 504, 'learning_rate': 0.08934017182949329, 'max_depth': 3, 'min_samples_leaf': 30, 'l2_regularization': 0.17315783411380536, 'max_features': 0.945442250431636, 'early_stopping': 'auto'}
+RMSE_train: 0.07356605758093387
+RMSE_crossval: (0.8659814992008885, 0.8167879784790893, [0.8089364332185196, 0.3327043165216667, 1.3087231856970816])
+RMSE_test: 0.6821617754550592
+MAE_test: 0.4456632953110449
+Willmott's d Test: 0.9927876991904544
+Nash-Sutcliffe Test: 0.9718909507783388
+Train data length: 38 months
+Trial time: 476.7850 seconds
+
+TARGET: GV51
+Best parameters: {'max_iter': 584, 'learning_rate': 0.040761864978705264, 'max_depth': 3, 'min_samples_leaf': 4, 'l2_regularization': 0.5778266385010171, 'max_features': 0.9994676183333666, 'early_stopping': 'auto'}
+RMSE_train: 0.10543877392044257
+RMSE_crossval: (0.7884673787873031, 0.7726784557145728, [0.8400889169973201, 0.5473787637045224, 0.930567686441876])
+RMSE_test: 0.5914707233573898
+MAE_test: 0.4600952493607411
+Willmott's d Test: 0.9954730161383754
+Nash-Sutcliffe Test: 0.9804453130303585
+Train data length: 38 months
+Trial time: 344.8198 seconds
+
+TARGET: MB4
+Best parameters: {'max_iter': 2267, 'learning_rate': 0.0003212324989605754, 'max_depth': 6, 'min_samples_leaf': 23, 'l2_regularization': 0.0203461620945653, 'max_features': 0.5599467474201785, 'early_stopping': True}
+RMSE_train: 1.94138276333325
+RMSE_crossval: (3.2468844862592485, 3.110362371741323, [2.937437416889921, 1.9180661814134716, 4.475583516920578])
+RMSE_test: 2.794534123201621
+MAE_test: 2.241201971684988
+Willmott's d Test: 0.8163261248651712
+Nash-Sutcliffe Test: 0.6043355192460274
+Train data length: 38 months
+Trial time: 1071.1160 seconds
+
+TARGET: MB8
+Best parameters: {'max_iter': 2325, 'learning_rate': 0.04764798057482348, 'max_depth': 2, 'min_samples_leaf': 4, 'l2_regularization': 1.9970487845900078, 'max_features': 0.588902781805003, 'early_stopping': 'auto'}
+RMSE_train: 1.3873650595784326
+RMSE_crossval: (4.1976771847175, 4.018651522896472, [4.133596959552392, 2.1134494680302747, 5.80890814110675])
+RMSE_test: 3.5096649675809837
+MAE_test: 2.257100936288923
+Willmott's d Test: 0.18991049950943117
+Nash-Sutcliffe Test: -6.919491397257804
+Train data length: 38 months
+Trial time: 470.2194 seconds
+
+TARGET: MB10
+Best parameters: {'max_iter': 815, 'learning_rate': 0.09963273294782583, 'max_depth': 5, 'min_samples_leaf': 28, 'l2_regularization': 4.122186969102826, 'max_features': 0.5261347640452287, 'early_stopping': True}
+RMSE_train: 0.24964292441766125
+RMSE_crossval: (5.356380837956338, 5.314179712424365, [5.630547324835356, 5.736190967744094, 4.575800844693643])
+RMSE_test: 3.635814448976868
+MAE_test: 2.5839964493717753
+Willmott's d Test: 0.2747977350598524
+Nash-Sutcliffe Test: -6.809483793690141
+Train data length: 38 months
+Trial time: 665.8681 seconds
+
+TARGET: MB18
+Best parameters: {'max_iter': 2269, 'learning_rate': 0.09935478670349428, 'max_depth': 4, 'min_samples_leaf': 2, 'l2_regularization': 3.2130147231013395, 'max_features': 0.5420482255505895, 'early_stopping': True}
+RMSE_train: 1.1365333310518524
+RMSE_crossval: (3.6622128930921245, 3.5017836133663365, [3.667927510917124, 1.731346918557666, 5.106076410624218])
+RMSE_test: 3.1999290593823195
+MAE_test: 2.737615785588724
+Willmott's d Test: 0.8603570500854265
+Nash-Sutcliffe Test: 0.36356487123010894
+Train data length: 38 months
+Trial time: 374.0479 seconds
+
+Total elapsed time: 3799.9695 seconds
+

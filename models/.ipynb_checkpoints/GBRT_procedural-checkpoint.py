@@ -110,16 +110,17 @@ def objective_gbrt(trial, X_train, y_train, penalty_factor):
             'verbose': 0,
             'random_state': 42,
             'max_iter': trial.suggest_int('max_iter', 500, 3000),
-            'learning_rate': trial.suggest_float("learning_rate", 1e-5, 0.1),
+            'learning_rate': trial.suggest_float("learning_rate", 1e-5, 0.09901, step=0.001),
             'max_depth': trial.suggest_int('max_depth', 1, 10),
             'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 30),
-            'l2_regularization': trial.suggest_float('l2_regularization', 0, 5),
-            'max_features': trial.suggest_float('max_features', 0.5, 1),
+            'l2_regularization': trial.suggest_float('l2_regularization', 0, 10, step=0.01),
+            'max_features': trial.suggest_float('max_features', 0.5, 1, step=0.01),
             'early_stopping': trial.suggest_categorical('early_stopping', [True, 'auto'])
             }
     
     model = HistGradientBoostingRegressor(**params)
     total_loss, avg_rmse, _ = cv_result(model, X_train, y_train, penalty_factor)
+    del model
     return total_loss
 
 
@@ -133,6 +134,7 @@ def gbrt_tune(target, X_train, y_train, n_trials, penalty_factor):
     trial = study_model.best_trial
     best_params = trial.params
     print('Best params from optuna: \n', best_params)
+    del study_model
     return best_params
 
 def gbrt_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor):
@@ -175,8 +177,8 @@ if __name__ == '__main__':
 
     poly_degree = 4
     test_size = 0.3
-    n_trials = 5
-    penalty_factor = 0.4
+    n_trials = 50
+    penalty_factor = 0.0
     
     for target in Response_variables:
         start_trial_time = time.time()

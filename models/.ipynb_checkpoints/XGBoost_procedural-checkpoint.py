@@ -110,19 +110,20 @@ def objective_xgb(trial, X_train, y_train, penalty_factor):
             'random_state': 42,
             'tree_method': 'hist',
             'n_estimators': trial.suggest_int('n_estimators', 500, 3000),
-            'learning_rate': trial.suggest_float("learning_rate", 1e-5, 0.1),
+            'learning_rate': trial.suggest_float("learning_rate", 1e-5, 0.09901, step=0.001),
             'max_depth': trial.suggest_int('max_depth', 1, 10),
             'max_leaves': trial.suggest_int('max_leaves', 2, 30),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1),
-            'subsample': trial.suggest_float('subsample', 0.5, 1),
-            'reg_alpha': trial.suggest_float('reg_alpha', 0, 5),               # L1 regularization term
-            'reg_lambda': trial.suggest_float('reg_lambda', 0, 5),             # L2 regularization term (similar to your 'l2_regularization')
-            'gamma': trial.suggest_float('gamma', 0, 5),
-            # 'booster': trial.suggest_categorical('booster', ['gbdt', 'dart'])
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1, step=0.01),
+            'subsample': trial.suggest_float('subsample', 0.5, 1, step=0.01),
+            'reg_alpha': trial.suggest_float('reg_alpha', 0, 10, step=0.01),               # L1 regularization term
+            'reg_lambda': trial.suggest_float('reg_lambda', 0, 10, step=0.01),             # L2 regularization term (similar to your 'l2_regularization')
+            'gamma': trial.suggest_float('gamma', 0, 5, step=0.01),
+            # 'booster': trial.suggest_categorical('booster', ['gbtree', 'dart'])  # not stable, dart makes runs break
             }
     
     model = XGBRegressor(**params)
     total_loss, avg_rmse, _ = cv_result(model, X_train, y_train, penalty_factor)
+    del model
     return total_loss
 
 
@@ -136,6 +137,7 @@ def xgb_tune(target, X_train, y_train, n_trials, penalty_factor):
     trial = study_model.best_trial
     best_params = trial.params
     print('Best params from optuna: \n', best_params)
+    del study_model
     return best_params
 
 def xgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor):
@@ -181,8 +183,8 @@ if __name__ == '__main__':
 
     poly_degree = 4
     test_size = 0.3
-    n_trials = 5
-    penalty_factor = 0.4
+    n_trials = 50
+    penalty_factor = 0.0
 
     for target in Response_variables:
         start_trial_time = time.time()
