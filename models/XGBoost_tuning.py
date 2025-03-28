@@ -1,8 +1,8 @@
-# LightGBM.py
+# XGBoost.py
 
 import numpy as np
 import pandas as pd
-from lightgbm import LGBMRegressor
+from xgboost import XGBRegressor
 import optuna
 from optuna.samplers import TPESampler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
@@ -99,40 +99,40 @@ def cv_result(model, X, y, penalty_factor=0.3):
     return total_loss, avg_rmse, rmse_list
 
 
-def objective_lgb(trial, X_train, y_train, penalty_factor):
+def objective_xgb(trial, X_train, y_train, penalty_factor):
     """
     The objective function to tune hyperparameters. It evaluate the score on a
     validation set. This function is used by Optuna, a Bayesian tuning framework.
     """
 
     params = {
-            # 'objective': 'regression',
-            'verbose': -1,
+            # 'eval_metric': 'rmse',
             'random_state': 42,
+            'tree_method': 'hist',
             'n_estimators': trial.suggest_int('n_estimators', 500, 3000),
             'learning_rate': trial.suggest_float("learning_rate", 1e-5, 0.09901, step=0.001),
-            'max_depth': trial.suggest_int('max_depth', 3, 12),
-            'num_leaves': trial.suggest_int('num_leaves', 2, 30),
+            'max_depth': trial.suggest_int('max_depth', 1, 10),
+            'max_leaves': trial.suggest_int('max_leaves', 2, 30),
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1, step=0.01),
             'subsample': trial.suggest_float('subsample', 0.5, 1, step=0.01),
-            'feature_fraction': trial.suggest_float('feature_fraction', 0.2, 1, step=0.01),
-            "min_gain_to_split": trial.suggest_float("min_gain_to_split", 0, 15, step=0.01),
             'reg_alpha': trial.suggest_float('reg_alpha', 0, 10, step=0.01),               # L1 regularization term
             'reg_lambda': trial.suggest_float('reg_lambda', 0, 10, step=0.01),             # L2 regularization term (similar to your 'l2_regularization')
-            'boosting_type': trial.suggest_categorical('boosting_type', ['gbdt', 'dart']),
-            'linear_tree': trial.suggest_categorical('linear_tree', [True, False])
+            'gamma': trial.suggest_float('gamma', 0, 5, step=0.01),
+            # 'booster': trial.suggest_categorical('booster', ['gbtree', 'dart'])  # not stable, dart makes runs break
             }
-    model = LGBMRegressor(**params)
+    
+    model = XGBRegressor(**params)
     total_loss, avg_rmse, _ = cv_result(model, X_train, y_train, penalty_factor)
     del model
     return total_loss
 
 
-def lgb_tune(target, X_train, y_train, n_trials, penalty_factor):
+def xgb_tune(target, X_train, y_train, n_trials, penalty_factor):
     # Uncomment to suppress optuna log messages
     # optuna.logging.set_verbosity(optuna.logging.WARNING)
     sampler = TPESampler(seed=42)
     study_model = optuna.create_study(direction = 'minimize', sampler = sampler, study_name=f'hyperparameters_tuning_{target}')
-    study_model.optimize(lambda trial: objective_lgb(trial, X_train, y_train, penalty_factor), n_trials = n_trials)  # type: ignore
+    study_model.optimize(lambda trial: objective_xgb(trial, X_train, y_train, penalty_factor), n_trials = n_trials)  # type: ignore
 
     trial = study_model.best_trial
     best_params = trial.params
@@ -140,9 +140,9 @@ def lgb_tune(target, X_train, y_train, n_trials, penalty_factor):
     del study_model
     return best_params
 
-def lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor):
+def xgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor):
     # Fit model
-    opt_model = LGBMRegressor(**best_params, verbose=-1)
+    opt_model = XGBRegressor(**best_params)
     opt_model.fit(X_train, y_train)
 
     # Predictions
@@ -160,13 +160,16 @@ def lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, p
     return all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, d_test, NSE_test
 
 # # Compute train/test scores
-# train_score = -opt_model.train_score_
-# test_score = np.zeros((opt_model.n_iter_,), dtype=np.float64)
-# for i, y_pred in enumerate(opt_model.staged_predict(X_test)):
-#     test_score[i] = mean_squared_error(y_test, y_pred)
-# iterations = np.arange(opt_model.n_iter_) + 1
+# train_score = np.zeros((n_splits), dtype=np.float64)   
+# for i, y_pred in enumerate(model.staged_predict(X_train)):
+#     train_score[i] = mean_squared_error(y_train, y_pred)
 
-# Compute permutation importance
+# test_score = np.zeros((n_splits), dtype=np.float64)
+# for i, y_pred in enumerate(model.staged_predict(X_test)):
+#     test_score[i] = mean_squared_error(y_test, y_pred)
+# iterations = np.arange(n_splits) + 1
+
+# # Compute permutation importance
 # actual_feature_names = X.columns
 # perm = permutation_importance(opt_model, X_test, y_test, n_repeats=10, random_state=42, n_jobs=2)
 # perm_idx = perm.importances_mean.argsort() #type: ignore
@@ -187,8 +190,8 @@ if __name__ == '__main__':
         start_trial_time = time.time()
 
         X, y, X_train, X_test, y_train, y_test, X_all, split_index, dates, total_months = process_data_for_target(target=target, poly_degree=poly_degree, test_size=test_size)
-        best_params = lgb_tune(target, X_train, y_train, n_trials, penalty_factor)
-        all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, d_test, NSE_test = lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor)
+        best_params = xgb_tune(target, X_train, y_train, n_trials, penalty_factor)
+        all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, d_test, NSE_test  = xgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all, penalty_factor)
         
         rmse_mean_crossval = rmse_crossval[1]
         rmse_crossval_folds = rmse_crossval[2]
@@ -212,12 +215,12 @@ if __name__ == '__main__':
         }
 
         # Pickle: save the plotting data and model to serial files
-        with open(f'./visualization/plotting_data/LightGBM/LightGBM_{target}_plotting_data.pkl', 'wb') as f:
+        with open(f'./visualization/plotting_data/XGBoost/XGBoost_{target}_plotting_data.pkl', 'wb') as f:
             pickle.dump(plotting_data, f)
 
-        opt_model = LGBMRegressor(**best_params, verbose=-1)
+        opt_model = XGBRegressor(**best_params)
 
-        with open(f'./visualization/models/LightGBM/LightGBM_model_{target}.pkl', 'wb') as file:
+        with open(f'./visualization/models/XGBoost/XGBoost_model_{target}.pkl', 'wb') as file:
             pickle.dump(opt_model, file)
 
         print("\n~~~ TARGET ~~~")
@@ -253,17 +256,18 @@ if __name__ == '__main__':
             'Number of trials': n_trials,
             'Trial time (seconds)': np.round(trial_time, 4)
         })
-
-    df_results = pd.DataFrame(results)
-    # df_results.to_csv("LightGBM_output_results.csv", index=False)
-
+    
     final_time = time.time()
     elapsed_time = final_time - start_time
     print(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
 
+    df_results = pd.DataFrame(results)
+    # df_results.to_csv("LightGBM_output_results.csv", index=False)
+
+
     # Write all metrics to a text file
-    with open(f"./tuning_output/LightGBM/LightGBM_output_test_26_3_pen_{penalty_factor*10:02.0f}.txt", "w") as file:
+    with open(f"./tuning_output/XGBoost/XGBoost_output_test_26_3_pen_{penalty_factor*10:02.0f}.txt", "w") as file:
         file.writelines(df_results.to_string(index=False))
         file.write(f"\n\nTotal elapsed time: {elapsed_time:.4f} seconds")
 
-    print(f"Output saved to LightGBM_output_test_26_3_pen_{penalty_factor*10:02.0f}.txt")
+    print(f"Output saved to XGBoost_output_test_26_3_pen_{penalty_factor*10:02.0f}.txt")
