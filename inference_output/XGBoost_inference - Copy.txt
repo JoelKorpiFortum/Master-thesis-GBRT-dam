@@ -1,0 +1,10 @@
+Target 	     RMSE_train  RMSE_crossval  RMSE_test  MAE_test     Nash-Sutcliffe Test  Kling-Gupta Test Train data length (months)  Target inference time (seconds)
+   GV1          0.099          0.495      0.345     0.249                0.989             0.950              	38                           5.8078
+   GV3        	0.121          0.853      0.622     0.395                0.977             0.945             	38                          26.7081
+  GV51          0.136          0.840      0.470     0.307                0.988             0.901         	38                          13.2408
+   MB4         	0.282          3.071      1.528     0.914                0.882             0.637             	38                          16.6286
+   MB8        	2.460          3.534      2.017     1.512               -1.616            -0.374             	38                          21.9777
+  MB10    	0.352          4.426      4.175     3.040               -9.296            -4.513            	38                          34.5007
+  MB18         	0.774          2.985      3.100     2.661                0.403             0.155         	38                          22.0227
+
+Total elapsed time: 153.9818 seconds

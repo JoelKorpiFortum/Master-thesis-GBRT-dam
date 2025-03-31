@@ -7,11 +7,14 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 FILE_PATHS = {
     'ÖVY': './data/LOS_DAMM_ÖVY.csv',
     'MB1_AM_L1': './data/LOS_DAMM_MB1_AM_L1.csv',
+    'MB1_AM_L1_extrapolation': './data/LOS_DAMM_MB1_AM_L1_extrapolation.csv',
     'MB1_AM_L3': './data/LOS_DAMM_MB1_AM_L3.csv',
     'MB1_HM_L51': './data/LOS_DAMM_MB1_HM_L51.csv',
     'MB4_A_D': './data/LOS_DAMM_MB4_A_D.csv',
     'MB8_A_D': './data/LOS_DAMM_MB8_A_D.csv',
+    'MB8_A_D_LS': './data/LOS_DAMM_MB8_A_D_LS.csv',
     'MB10_A_D': './data/LOS_DAMM_MB10_A_D.csv',
+    'MB10_A_D_LS': './data/LOS_DAMM_MB10_A_D_LS.csv',
     'MB18_A_D': './data/LOS_DAMM_MB18_A_D.csv',
     'UTETEMP': './data/LOS_DAMM_UTETEMP.csv',
     'PRECIP': './data/LOS_DAMM_PRECIP.csv',
@@ -21,22 +24,26 @@ DATASET_MAPPING = {
     'h': 'ÖVY',
     'h_MA_007': 'derived_temporal', # MA = MOVING AVERAGE
     'h_MA_014': 'derived_temporal', # MA
+    'h_MA_030': 'derived_temporal', # MA
     'h_MA_060': 'derived_temporal', # MA
-    'h_MA_180': 'derived_temporal', # MA
     'h_RC_007': 'derived_temporal', # RC = RATE OF CHANGE
     'h_RC_030': 'derived_temporal', # RC
     'GV1': 'MB1_AM_L1',
+    'GV1_extrapolation': 'MB1_AM_L1_extrapolation',
     'GV3': 'MB1_AM_L3',
     'GV51': 'MB1_HM_L51',
     'MB4': 'MB4_A_D',
-    'MB8': 'MB8_A_D',
-    'MB10': 'MB10_A_D',
+    # 'MB8': 'MB8_A_D',
+    'MB8': 'MB8_A_D_LS',
+    # 'MB10': 'MB10_A_D',
+    'MB10': 'MB10_A_D_LS',
     'MB18': 'MB18_A_D',
     'T': 'UTETEMP',
     'T_MA_001': 'derived_temporal', # MA
     'T_MA_007': 'derived_temporal', # MA
     'T_MA_014': 'derived_temporal', # MA
     'T_MA_030': 'derived_temporal', # MA
+    'T_MA_060': 'derived_temporal',
     'P': 'PRECIP',
     'P_RS_030': 'derived_temporal', # RS = RUNNING SUM
     'P_RS_060': 'derived_temporal', # RS 
@@ -51,12 +58,13 @@ DATASET_MAPPING = {
     'ln_t': 'derived', 
     'month': 'derived',
     'year': 'derived',
-    'feature_name': 'dataset_key'
+    'feature_name': 'dataset_key',
 }
 
 DERIVED_FEATURE_BASES = {
     'h_MA_007': 'h',
     'h_MA_014': 'h',
+    'h_MA_030': 'h',
     'h_MA_060': 'h',
     'h_MA_180': 'h',
     'h_RC_007': 'h',
@@ -65,6 +73,7 @@ DERIVED_FEATURE_BASES = {
     'T_MA_007': 'T',
     'T_MA_014': 'T',
     'T_MA_030': 'T',
+    'T_MA_060': 'T',
     'P_RS_030': 'P',
     'P_RS_060': 'P',
     'P_RS_090': 'P',
@@ -326,12 +335,12 @@ def mapping(feature):
 
 
 if __name__ == "__main__":
-    features = ['h_poly', 'h', 'GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', \
+    features = ['h_poly', 'h', 'GV1', 'GV1_extrapolation', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', \
                  'P', 'T', 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year', \
-                 'h_MA_007', 'h_MA_014', 'h_MA_060', 'h_RC_007', 'h_RC_030', 'T_MA_001', 'T_MA_007', \
-                 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180']
+                 'h_MA_007', 'h_MA_014', 'h_MA_030', 'h_MA_060', 'h_RC_007', 'h_RC_030', 'T_MA_001', 'T_MA_007', \
+                 'T_MA_030', 'T_MA_060', 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180']
     poly_degree = 4
-    target = 'GV1'
+    target = 'GV3'
     start_date = "08-01-2020" #MM-dd-YYYY
     end_date = "03-01-2025" #MM-dd-YYYY
     validation_size = 0

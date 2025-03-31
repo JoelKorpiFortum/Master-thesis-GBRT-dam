@@ -1,7 +1,7 @@
 # LightGBM_params.py
 
 HYPERPARAMETERS = {
-    'GV1':  {
+    'GV1_extrapolation':  {
         'n_estimators': 2984, 
         'learning_rate': 0.018, 
         'max_depth': 11, 

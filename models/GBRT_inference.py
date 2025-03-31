@@ -36,7 +36,8 @@ def process_data_for_target(target, poly_degree=4, test_size=0.3):
                 'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 'P', 'P_RS_030', \
                 'P_RS_060', 'P_RS_090', 'P_RS_180', 'T', 'T_MA_001', 'T_MA_007', \
                 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year']
-    features.remove(target)
+    if target in features:
+        features.remove(target)
     path = f'./data/LOS_DAMM_{mapping(target)}.csv'
     data = pd.read_csv(path, sep=';', parse_dates=['Date-Time'])
 

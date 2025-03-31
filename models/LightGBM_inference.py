@@ -32,11 +32,16 @@ def process_data_for_target(target, poly_degree=4, test_size=0.3):
     - X_train, X_test, y_train, y_test, split_index, dates, total_months
     """
 
-    features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', 'h', \
+    # features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', 'h', \
+    #             'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 'P', 'P_RS_030', \
+    #             'P_RS_060', 'P_RS_090', 'P_RS_180', 'T', 'T_MA_001', 'T_MA_007', \
+    #             # 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year']
+    features = ['GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', 'h', \
                 'h_MA_007', 'h_MA_014', 'h_RC_007', 'h_RC_030', 'P', 'P_RS_030', \
                 'P_RS_060', 'P_RS_090', 'P_RS_180', 'T', 'T_MA_001', 'T_MA_007', \
                 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year']
-    features.remove(target)
+    if target in features:
+        features.remove(target)
     path = f'./data/LOS_DAMM_{mapping(target)}.csv'
     data = pd.read_csv(path, sep=';', parse_dates=['Date-Time'])
 
@@ -125,8 +130,9 @@ def lgb_predict_evaluate(best_params, X_train, X_test, y_train, y_test, X_all):
 
 if __name__ == '__main__':
     start_time = time.time()
-    Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
-    # Response_variables = ['MB10']
+    # Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
+    Response_variables = ['MB8', 'MB10']
+    # Response_variables = ['GV1_extrapolation']
     results = []  # List to store output for each target
 
     poly_degree = 4

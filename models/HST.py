@@ -41,8 +41,8 @@ def process_data_for_target(target, poly_degree=4, test_size=0.3):
     # Preprocess the data (You would need to define preprocess_data elsewhere in your code)
     X, y, dates = preprocess_data(features, target, start_date, end_date, poly_degree=poly_degree, test_size=test_size)
     
-    X.drop(columns=['h'], inplace=True)
-    y.drop(columns=['h'], inplace=True)
+    X.drop(columns=['h'], inplace=True)  # Redundant with h_poly_1
+    y.drop(columns=['h'], inplace=True)  # Redundant with h_poly_1
 
     # Split the data into training and testing sets (Assumes split_data is defined elsewhere)
     X_train, X_test, y_train, y_test, split_index, _ = split_data_normalized(X, y, test_size=test_size)
@@ -88,7 +88,8 @@ def hst_train_predict_evaluate(X_train, X_test, y_train, y_test, X_all):
 
 if __name__ == '__main__':
     start_time = time.time()
-    Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
+    # Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
+    Response_variables = ['GV1_extrapolation']
     results = []  # List to store output for each target
     for target in Response_variables:
         start_trial_time = time.time()
@@ -155,8 +156,8 @@ if __name__ == '__main__':
     # df_results.to_csv("LightGBM_output_results.csv", index=False)
 
     # Write all metrics to a text file
-    with open("HST_output.txt", "w") as file:
+    with open("./inference_output/HST_inference.txt", "w") as file:
         file.writelines(df_results.to_string(index=False))
         file.write(f"\n\nTotal elapsed time: {elapsed_time:.4f} seconds")
 
-    print("Output saved to HST_output.txt")
+    print("Output saved to HST_inference.txt")
