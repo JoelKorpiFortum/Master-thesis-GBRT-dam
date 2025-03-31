@@ -1,0 +1,4 @@
+Target                                                                                                                                                                                                                    Best Parameters  RMSE_train  RMSE_crossval  RMSE_test  MAE_test  Nash-Sutcliffe Test  Kling-Gupta Test  Train data length (months)  Penalty factor  Number of trials  Trial time (seconds)
+  MB10 {'n_estimators': 2116, 'learning_rate': 0.04301000000000001, 'max_depth': 5, 'num_leaves': 27, 'subsample': 0.97, 'feature_fraction': 0.2, 'min_gain_to_split': 3.54, 'reg_alpha': 6.45, 'reg_lambda': 0.54, 'linear_tree': False}       0.309          1.453      1.279      1.03                0.025             0.135                          38             0.6                50               45.9877
+
+Total elapsed time: 45.9878 seconds

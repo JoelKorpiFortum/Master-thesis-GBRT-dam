@@ -1,0 +1,10 @@
+Target    RMSE_train  RMSE_crossval  RMSE_test  MAE_test  Willmott's d Test  Nash-Sutcliffe Test  Train data length (months)  Penalty factor  Number of trials  Trial time (seconds)
+   GV1     0.107          9.313      0.331     0.240              0.997                0.990                          38             0.3                50               53.8024
+   GV3     0.094          0.774      0.675     0.422              0.993                0.972                          38             0.3                50               56.6137
+  GV51     0.161          0.682      0.446     0.296              0.997                0.989                          38             0.3                50               55.9287
+   MB4     0.393          3.206      1.932     1.164              0.932                0.811                          38             0.3                50               53.0759
+   MB8     1.163          3.011     50.224    20.671              0.006            -1620.737                          38             0.3                50               67.7942
+  MB10     0.365          1.341      1.262     1.018              0.643                0.059                          38             0.3                50               41.9350
+  MB18     1.112          4.178      2.420     1.932              0.916                0.636                          38             0.3                50               39.9638
+
+Total elapsed time: 369.1143 seconds

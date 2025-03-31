@@ -7,11 +7,15 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 FILE_PATHS = {
     'ÖVY': './data/LOS_DAMM_ÖVY.csv',
     'MB1_AM_L1': './data/LOS_DAMM_MB1_AM_L1.csv',
+    'MB1_AM_L1_extrapolation': './data/LOS_DAMM_MB1_AM_L1_extrapolation.csv',
     'MB1_AM_L3': './data/LOS_DAMM_MB1_AM_L3.csv',
     'MB1_HM_L51': './data/LOS_DAMM_MB1_HM_L51.csv',
     'MB4_A_D': './data/LOS_DAMM_MB4_A_D.csv',
     'MB8_A_D': './data/LOS_DAMM_MB8_A_D.csv',
+    'MB8_A_D_LS': './data/LOS_DAMM_MB8_A_D_LS.csv',
     'MB10_A_D': './data/LOS_DAMM_MB10_A_D.csv',
+    # 'MB10_A_D_LS': './data/LOS_DAMM_MB10_A_D_LS.csv',
+    'MB10_A_D_LS_smoothed': './data/LOS_DAMM_MB10_A_D_LS_smoothed.csv',
     'MB18_A_D': './data/LOS_DAMM_MB18_A_D.csv',
     'UTETEMP': './data/LOS_DAMM_UTETEMP.csv',
     'PRECIP': './data/LOS_DAMM_PRECIP.csv',
@@ -21,22 +25,27 @@ DATASET_MAPPING = {
     'h': 'ÖVY',
     'h_MA_007': 'derived_temporal', # MA = MOVING AVERAGE
     'h_MA_014': 'derived_temporal', # MA
+    'h_MA_030': 'derived_temporal', # MA
     'h_MA_060': 'derived_temporal', # MA
-    'h_MA_180': 'derived_temporal', # MA
     'h_RC_007': 'derived_temporal', # RC = RATE OF CHANGE
     'h_RC_030': 'derived_temporal', # RC
     'GV1': 'MB1_AM_L1',
+    'GV1_extrapolation': 'MB1_AM_L1_extrapolation',
     'GV3': 'MB1_AM_L3',
     'GV51': 'MB1_HM_L51',
     'MB4': 'MB4_A_D',
-    'MB8': 'MB8_A_D',
-    'MB10': 'MB10_A_D',
+    # 'MB8': 'MB8_A_D',
+    'MB8': 'MB8_A_D_LS',
+    # 'MB10': 'MB10_A_D',
+    # 'MB10': 'MB10_A_D_LS',
+    'MB10': 'MB10_A_D_LS_smoothed',
     'MB18': 'MB18_A_D',
     'T': 'UTETEMP',
     'T_MA_001': 'derived_temporal', # MA
     'T_MA_007': 'derived_temporal', # MA
     'T_MA_014': 'derived_temporal', # MA
     'T_MA_030': 'derived_temporal', # MA
+    'T_MA_060': 'derived_temporal',
     'P': 'PRECIP',
     'P_RS_030': 'derived_temporal', # RS = RUNNING SUM
     'P_RS_060': 'derived_temporal', # RS 
@@ -51,12 +60,13 @@ DATASET_MAPPING = {
     'ln_t': 'derived', 
     'month': 'derived',
     'year': 'derived',
-    'feature_name': 'dataset_key'
+    'feature_name': 'dataset_key',
 }
 
 DERIVED_FEATURE_BASES = {
     'h_MA_007': 'h',
     'h_MA_014': 'h',
+    'h_MA_030': 'h',
     'h_MA_060': 'h',
     'h_MA_180': 'h',
     'h_RC_007': 'h',
@@ -65,6 +75,7 @@ DERIVED_FEATURE_BASES = {
     'T_MA_007': 'T',
     'T_MA_014': 'T',
     'T_MA_030': 'T',
+    'T_MA_060': 'T',
     'P_RS_030': 'P',
     'P_RS_060': 'P',
     'P_RS_090': 'P',
@@ -73,7 +84,7 @@ DERIVED_FEATURE_BASES = {
 }
 
 
-def load_and_split_dataset(path, common_start_date=None, common_end_date=None, calibration_size=0, test_size=0.3):
+def load_and_split_dataset(path, common_start_date=None, common_end_date=None, validation_size=0.2, test_size=0.2):
     """ Helper function ot load, align and interpolate measurements to create one uniform dataset."""
 
     df = pd.read_csv(path, sep=';', parse_dates=['Date-Time']) # Forgot to add sep
@@ -95,28 +106,28 @@ def load_and_split_dataset(path, common_start_date=None, common_end_date=None, c
     all_dates = pd.date_range(start=start_date, end=end_date, freq='h')
     df_reindexed = df.reindex(all_dates)
 
-    # Split into train, calibration and test
-    split_idx_train = int(len(df_reindexed) * (1 - test_size - calibration_size))
-    split_idx_calibration = int(len(df_reindexed) * (1 - test_size))
+    # Split into train, validation and test
+    split_idx_train = int(len(df_reindexed) * (1 - test_size - validation_size))
+    split_idx_validation = int(len(df_reindexed) * (1 - test_size))
     
     train = df_reindexed.iloc[:split_idx_train]
-    calibration = df_reindexed.iloc[split_idx_train:split_idx_calibration]
-    test = df_reindexed.iloc[split_idx_calibration:]
+    validation = df_reindexed.iloc[split_idx_train:split_idx_validation]
+    test = df_reindexed.iloc[split_idx_validation:]
 
-    # Interpolate separately on train, calibration and test sets
+    # Interpolate separately on train, validation and test sets
     train_interpolated = train.interpolate(method='time')
-    calibration_interpolated = calibration.interpolate(method='time')
+    validation_interpolated = validation.interpolate(method='time')
     test_interpolated = test.interpolate(method='time')
 
     # Combine interpolated sets
-    df_interpolated = pd.concat([train_interpolated, calibration_interpolated, test_interpolated])
+    df_interpolated = pd.concat([train_interpolated, validation_interpolated, test_interpolated])
     df_interpolated.reset_index(inplace=True)
     df_interpolated.rename(columns={'index': 'Date-Time'}, inplace=True)
     
-    return df_interpolated, split_idx_train, split_idx_calibration
+    return df_interpolated, split_idx_train, split_idx_validation
 
 
-def load_and_merge_data(features, target, start_date, end_date, calibration_size=0, test_size=0.3):
+def load_and_merge_data(features, target, start_date, end_date, validation_size=0.2, test_size=0.2):
     """ Combines all measurements into one dataset."""
 
     datasets_required = set()
@@ -139,8 +150,8 @@ def load_and_merge_data(features, target, start_date, end_date, calibration_size
         path = FILE_PATHS.get(dataset_key)
         if path is None:
             raise ValueError(f"Dataset '{dataset_key}' not found in FILE_PATHS.")
-        df_interpolated, split_idx_train, split_idx_calibration = load_and_split_dataset(path, common_start_date=start_date, \
-                                                  common_end_date=end_date, test_size=test_size, calibration_size=calibration_size)
+        df_interpolated, split_idx_train, split_idx_validation = load_and_split_dataset(path, common_start_date=start_date, \
+                                                  common_end_date=end_date, test_size=test_size, validation_size=validation_size)
         loaded_dataframes[dataset_key] = df_interpolated
 
     df_merged = pd.DataFrame()
@@ -150,7 +161,7 @@ def load_and_merge_data(features, target, start_date, end_date, calibration_size
         else:
             df_merged = pd.merge(df_merged, df, on='Date-Time', how='inner')
 
-    return df_merged, split_idx_train, split_idx_calibration
+    return df_merged, split_idx_train, split_idx_validation
 
 
 def apply_transformation(data, base_var, transformation_type, window_size):
@@ -164,18 +175,21 @@ def apply_transformation(data, base_var, transformation_type, window_size):
         return rolling_mean.pct_change(periods=window_size) * 100
 
 
-def preprocess_temporal_features(data, feature, split_idx_train):
+def preprocess_temporal_features(data, feature, split_idx_train, split_idx_validation):
     """ Function for derived temporal features, used for avoiding 
         data leakage by separating calculations for train and test data."""
 
     data_preprocessed_train = pd.DataFrame()
+    data_preprocessed_val = pd.DataFrame()
     data_preprocessed_test = pd.DataFrame()
     
     # Separate the train and test data
     data_train = data.iloc[:split_idx_train]
-    data_test = data.iloc[split_idx_train:]
+    data_val = data.iloc[split_idx_train:split_idx_validation]
+    data_test = data.iloc[split_idx_validation:]
 
     data_preprocessed_train = data_train[['Date-Time']].copy()
+    data_preprocessed_val = data_val[['Date-Time']].copy()
     data_preprocessed_test = data_test[['Date-Time']].copy()
 
     # Split string to get each component of the specified feature
@@ -187,18 +201,19 @@ def preprocess_temporal_features(data, feature, split_idx_train):
 
     # Apply transformation for train and test using helper function
     data_preprocessed_train[feature] = apply_transformation(data_train, base_var, transformation_type, window_size)
+    data_preprocessed_val[feature] = apply_transformation(data_val, base_var, transformation_type, window_size)
     data_preprocessed_test[feature] = apply_transformation(data_test, base_var, transformation_type, window_size)
 
     # Concat train and test dataframes before returning
-    data_preprocessed = pd.concat([data_preprocessed_train, data_preprocessed_test], axis=0).sort_index()
+    data_preprocessed = pd.concat([data_preprocessed_train, data_preprocessed_val, data_preprocessed_test], axis=0).sort_index()
     data_preprocessed = data_preprocessed[[feature]]
 
     return data_preprocessed
 
-def preprocess_data(features, target, start_date, end_date, poly_degree=None, calibration_size=0, test_size=0.3):
+def preprocess_data(features, target, start_date, end_date, poly_degree=None, validation_size=0.2, test_size=0.2):
     """ Fetches data and creates all derived features."""
 
-    df, split_idx_train, split_idx_calibration = load_and_merge_data(features, target, start_date, end_date, calibration_size=calibration_size, test_size=test_size)
+    df, split_idx_train, split_idx_validation = load_and_merge_data(features, target, start_date, end_date, validation_size=validation_size, test_size=test_size)
     target_name = DATASET_MAPPING[target]
     df_preprocessed = pd.DataFrame()
     df_preprocessed = df[['Date-Time', target_name]].copy()
@@ -240,7 +255,7 @@ def preprocess_data(features, target, start_date, end_date, poly_degree=None, ca
                     df_preprocessed[f'h_poly_{i}'] = h_poly[:, i]
 
         elif feature_origin == 'derived_temporal': # Temporal derived features
-            df_preprocessed[feature] = preprocess_temporal_features(df, feature, split_idx_train)
+            df_preprocessed[feature] = preprocess_temporal_features(df, feature, split_idx_train, split_idx_validation)
 
         elif feature_origin in df: # Non-derived features, no processing
             df_preprocessed[feature] = df[feature_origin]
@@ -253,7 +268,7 @@ def preprocess_data(features, target, start_date, end_date, poly_degree=None, ca
     return X, y, dates
 
 
-def split_data(X, y, test_size=0.3, split_index_from_end=None):
+def split_data(X, y, test_size=0.2, split_index_from_end=None):
     """ Splits data into train and test WITHOUT normalization 
     (not necessary for boosted trees)."""
 
@@ -270,7 +285,7 @@ def split_data(X, y, test_size=0.3, split_index_from_end=None):
     return X_train, X_test, y_train, y_test, split_idx
 
 
-def split_data_normalized(X, y, test_size=0.3, split_index_from_end=None):
+def split_data_normalized(X, y, test_size=0.2, split_index_from_end=None):
     """ Splits data into train and test WITH normalization 
     (necessary for HST)."""
 
@@ -292,50 +307,51 @@ def split_data_normalized(X, y, test_size=0.3, split_index_from_end=None):
     X_test_scaled = scaler.transform(X_test)
     X_test_scaled = pd.DataFrame(X_test_scaled, columns=X_test.columns, index=X_test.index)
 
-    return X_train_scaled, X_test_scaled, y_train, y_test, scaler, split_idx
+    return X_train_scaled, X_test_scaled, y_train, y_test, split_idx, scaler
 
 
-def split_data_calibration(X, y, calibration_size=0.2, test_size=0.3, split_index_from_end=None):
-    """ Splits data into train, calibration and test 
-    WITHOUT normalization (necessary for Conformal Predictions)."""
+def split_data_validation(X, y, validation_size=0.2, test_size=0.2, split_index_from_end=None):
+    """ Splits data into train, validation and test 
+    WITHOUT normalization."""
 
     if split_index_from_end:
         split_idx = len(y) - split_index_from_end
     else:
-        split_idx_train = int(len(X) * (1 - test_size - calibration_size))
-        split_idx_calibration = int(len(X) * (1 - test_size))
-        split_idx = [split_idx_train, split_idx_calibration]
+        split_idx_validation = int(len(X) * (1 - test_size - validation_size))
+        split_idx_test = int(len(X) * (1 - test_size))
     
-    X_train = X.iloc[:split_idx_train]
-    X_calib = X.iloc[split_idx_train:split_idx_calibration]
-    X_test = X.iloc[split_idx_calibration:]
-    y_train = y.iloc[:split_idx_train] if y is not None else None
-    y_calib = y.iloc[split_idx_train:split_idx_calibration] if y is not None else None
-    y_test = y.iloc[split_idx_calibration:] if y is not None else None
+    X_train = X.iloc[:split_idx_validation]
+    X_val = X.iloc[split_idx_validation:split_idx_test]
+    X_test = X.iloc[split_idx_test:]
+    y_train = y.iloc[:split_idx_validation] if y is not None else None
+    y_val = y.iloc[split_idx_validation:split_idx_test] if y is not None else None
+    y_test = y.iloc[split_idx_test:] if y is not None else None
 
-    return X_train, X_calib, X_test, y_train, y_calib, y_test, split_idx
+    return X_train, X_val, X_test, y_train, y_val, y_test, split_idx_validation, split_idx_test
 
-""" Returns correctly mapped feature name according to original signal."""
+
 def mapping(feature):
+    """ Returns correctly mapped feature name from original signal."""
+
     return DATASET_MAPPING[feature]
 
 
 if __name__ == "__main__":
-    features = ['h_poly', 'h', 'GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', \
+    features = ['h_poly', 'h', 'GV1', 'GV1_extrapolation', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', \
                  'P', 'T', 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year', \
-                 'h_MA_007', 'h_MA_014', 'h_MA_060', 'h_RC_007', 'h_RC_030', 'T_MA_001', 'T_MA_007', \
-                 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180']
+                 'h_MA_007', 'h_MA_014', 'h_MA_030', 'h_MA_060', 'h_RC_007', 'h_RC_030', 'T_MA_001', 'T_MA_007', \
+                 'T_MA_030', 'T_MA_060', 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180']
     poly_degree = 4
-    target = 'GV1'
+    target = 'GV3'
     start_date = "08-01-2020" #MM-dd-YYYY
     end_date = "03-01-2025" #MM-dd-YYYY
-    calibration_size = 0
-    test_size = 0.3
+    validation_size = 0
+    test_size = 0.2
     
     X, y, dates = preprocess_data(features, target, start_date, end_date, poly_degree=poly_degree, \
-                               test_size=test_size, calibration_size=calibration_size)
+                               test_size=test_size, validation_size=validation_size)
     
-    # X_train, X_calib, X_test, y_train, y_calib, y_test, split_idx = split_data_calibration(X, y, calibration_size=calibration_size, test_size=test_size)
+    # X_train, X_val, X_test, y_train, y_val, y_test, split_idx_validation, split_idx_test = split_data_validation(X, y, validation_size=validation_size, test_size=test_size)
     X_train, X_test, y_train, y_test, split_idx = split_data(X, y, test_size=test_size)
     print("Data preparation completed.")
 
@@ -349,16 +365,18 @@ if __name__ == "__main__":
         file.write(str(y) + "\n\n")
         file.write("X_train (Training Features):\n")
         file.write(str(X_train) + "\n\n")
-        # file.write("X_calib (Calibration Features):\n")
-        # file.write(str(X_calib) + "\n\n")
+        # file.write("X_val (Validation Features):\n")
+        # file.write(str(X_val) + "\n\n")
         file.write("X_test (Test Features):\n")
         file.write(str(X_test) + "\n\n")
         file.write("y_train (Training Target):\n")
         file.write(str(y_train) + "\n\n")
-        # file.write("y_calib (Calibration Target):\n")
-        # file.write(str(y_calib) + "\n\n")
+        # file.write("y_val (Validation Target):\n")
+        # file.write(str(y_val) + "\n\n")
         file.write("y_test (Test Target):\n")
         file.write(str(y_test) + "\n\n")
-        file.write("Split Index list (Split Indices):\n")
-        file.write(str(split_idx) + "\n\n")
+        # file.write("Split Index Calidaiton:\n")
+        # file.write(str(split_idx_validation) + "\n\n")
+        # file.write("Split Index Test):\n")
+        # file.write(str(split_idx_test) + "\n\n")
     print("Output saved to output.txt")
