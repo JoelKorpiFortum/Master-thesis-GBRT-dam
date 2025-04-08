@@ -1,0 +1,9 @@
+Target,Best Parameters,RMSE_train,RMSE_crossval,RMSE_test,MAE_test,Nash-Sutcliffe Test,Kling-Gupta Test,Train data length (months),Inference time (s),Elapsed time
+GV1,"{'max_iter': 914, 'learning_rate': 0.066, 'max_depth': 2, 'min_samples_leaf': 22, 'l2_regularization': 8.14, 'max_features': 0.77, 'early_stopping': 'auto'}",0.069,0.432,0.253,0.189,0.994,0.997,43.0,15.6962,0.0
+GV3,"{'max_iter': 1747, 'learning_rate': 0.042, 'max_depth': 3, 'min_samples_leaf': 5, 'l2_regularization': 8.81, 'max_features': 0.89, 'early_stopping': 'auto'}",0.054,0.856,0.706,0.454,0.967,0.983,43.0,24.1571,0.0
+GV51,"{'max_iter': 895, 'learning_rate': 0.037, 'max_depth': 2, 'min_samples_leaf': 29, 'l2_regularization': 3.39, 'max_features': 0.9, 'early_stopping': True}",0.116,0.678,0.458,0.279,0.988,0.978,43.0,8.7221,0.0
+MB4,"{'max_iter': 2648, 'learning_rate': 0.006, 'max_depth': 7, 'min_samples_leaf': 25, 'l2_regularization': 6.75, 'max_features': 0.65, 'early_stopping': 'auto'}",0.517,3.17,1.267,0.921,0.917,0.851,43.0,41.5736,0.0
+MB8,"{'max_iter': 1158, 'learning_rate': 0.0024014123075105373, 'max_depth': 6, 'min_samples_leaf': 8, 'l2_regularization': 9.273107706273734, 'max_features': 0.13952678672446914, 'early_stopping': 'auto'}",1.009,3.902,3.019,2.268,-4.579,-1.024,43.0,24.4835,0.0
+MB10,"{'max_iter': 507, 'learning_rate': 0.00801, 'max_depth': 5, 'min_samples_leaf': 15, 'l2_regularization': 7.23, 'max_features': 0.56, 'early_stopping': 'auto'}",0.324,1.307,1.205,1.044,0.044,-0.1,43.0,10.39,0.0
+MB18,"{'max_iter': 2340, 'learning_rate': 0.01701, 'max_depth': 3, 'min_samples_leaf': 14, 'l2_regularization': 1.64, 'max_features': 0.5, 'early_stopping': True}",1.158,5.131,2.186,1.841,0.705,0.719,43.0,9.2542,0.0
+,,,,,,,,,,142.3301453590393

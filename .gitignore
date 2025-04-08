@@ -1,6 +1,12 @@
 /data
 /.ipynb_checkpoints
+# /visualization/.ipynb_checkpoints
+# /models/__pycache__
+# /processing/__pycache__
+/visualization/underfitted_MB8_example.png
 kladd.ipynb
 output.txt
 core.1438
 
+
+# Update req.txt before finished, make a clean env in anaconda!

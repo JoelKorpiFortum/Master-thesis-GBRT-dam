@@ -62,10 +62,10 @@ def process_data_for_target(target, poly_degree=4, test_size=0.3):
 def hst_train_predict_evaluate(X_train, X_test, y_train, y_test, X_all):
     # Fit model
     HST_model = LinearRegression()
-
-    tscv = TimeSeriesSplit(n_splits=3, test_size=int(0.1*len(X)))
+    n_splits=3
+    tscv = TimeSeriesSplit(n_splits=n_splits, test_size=int(0.1*len(X)))
     cv_scores = cross_val_score(HST_model, X_train, y_train, cv=tscv, scoring='neg_root_mean_squared_error', n_jobs=-1)
-    rmse_val = np.mean(-cv_scores)
+    rmse_crossval = np.mean(-cv_scores)
     for idx, score in enumerate(-cv_scores):
         print(f"Split {idx+1}: RMSE = {score}")
     HST_model.fit(X_train, y_train)
@@ -83,32 +83,31 @@ def hst_train_predict_evaluate(X_train, X_test, y_train, y_test, X_all):
     KGE_test = kling_gupta(y_test, test_predictions)
     feature_names = X_train.columns.tolist()
     coefficients = dict(zip(feature_names, HST_model.coef_))
-    return all_predictions, rmse_train, rmse_val, rmse_test, mae_test, NSE_test, KGE_test, coefficients, HST_model
+    return HST_model, coefficients, all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, NSE_test, KGE_test
 
 
 if __name__ == '__main__':
     start_time = time.time()
-    # Response_variables = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
-    Response_variables = ['GV1_extrapolation']
+    elapsed_time = 0.0
+    targets = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18']
     results = []  # List to store output for each target
-    for target in Response_variables:
-        start_trial_time = time.time()
-        poly_degree = 4
-        test_size = 0.3
-        n_trials = 2
+    poly_degree = 4
+    test_size = 0.2
+
+    for target in targets:
         X, y, X_train, X_test, y_train, y_test, X_all, split_index, dates, total_months = process_data_for_target(target=target, poly_degree=poly_degree, test_size=test_size)
         start_inference_time = time.time()
-        all_predictions, rmse_train, rmse_mean_crossval, rmse_test, mae_test, NSE_test, KGE_test, coefficients, HST_model = hst_train_predict_evaluate(X_train, X_test, y_train, y_test, X_all)
+        HST_model, coefficients, all_predictions, rmse_train, rmse_crossval, rmse_test, mae_test, NSE_test, KGE_test = hst_train_predict_evaluate(X_train, X_test, y_train, y_test, X_all)
         end_inference_time = time.time()
         plotting_data = {
             'X': X,
-            'actual_y': y,
+            'y': y,
             'X_all': X_all,
             'dates': dates,
             'predictions': all_predictions,
             'split_index': split_index,
             'coefficients': coefficients,
-            'RMSE_crossval': rmse_mean_crossval,
+            'RMSE_crossval': rmse_crossval,
             'RMSE': rmse_test,
             'MAE': mae_test,
             'NSE': NSE_test,
@@ -126,38 +125,36 @@ if __name__ == '__main__':
         print(target)
         print("\n~~~ TEST METRICS ~~~")
         print(f"RMSE_train: {rmse_train:.3f}")
-        print(f"RMSE_crossval: {rmse_mean_crossval:.3f}")
+        print(f"RMSE_crossval: {rmse_crossval:.3f}")
         print(f"RMSE_test: {rmse_test:.3f}")
         print(f"MAE_test: {mae_test:.3f}")
         print(f"Nash-Sutcliffe Test: {NSE_test:.3f}")
         print(f"Kling-Gupta Test: {KGE_test:.3f}")
         print("\n~~~ OTHER STATS ~~~")
         print(f"Train data length: {total_months} months")
+        print("~~~~~~~~~~~~~~~~~~\n")
 
         inference_time = end_inference_time - start_inference_time
         print(f"Target inference time: {inference_time:.4f} seconds\n")
         results.append({
             'Target': target,
             'RMSE_train': np.round(rmse_train, 3),
-            'RMSE_crossval': np.round(rmse_mean_crossval, 3),
+            'RMSE_crossval': np.round(rmse_crossval, 3),
             'RMSE_test': np.round(rmse_test, 3),
             'MAE_test': np.round(mae_test, 3),
             'Nash-Sutcliffe Test': np.round(NSE_test, 3),
             'Kling-Gupta Test': np.round(KGE_test, 3),
             'Train data length (months)': total_months,
-            'Target inference time (seconds)': np.round(inference_time, 4)
+            'Target inference time (seconds)': np.round(inference_time, 4),
+            'Elapsed time': elapsed_time
         })
 
     final_time = time.time()
     elapsed_time = final_time - start_time
     print(f"Total elapsed time: {elapsed_time:.4f} seconds\n")
+    results.append({'Elapsed time': elapsed_time})
 
     df_results = pd.DataFrame(results)
-    # df_results.to_csv("LightGBM_output_results.csv", index=False)
+    df_results.to_csv("./models/output/HST_results_inference.csv", index=False)
 
-    # Write all metrics to a text file
-    with open("./inference_output/HST_inference.txt", "w") as file:
-        file.writelines(df_results.to_string(index=False))
-        file.write(f"\n\nTotal elapsed time: {elapsed_time:.4f} seconds")
-
-    print("Output saved to HST_inference.txt")
+    print("Finished")

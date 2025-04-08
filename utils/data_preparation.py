@@ -11,13 +11,13 @@ FILE_PATHS = {
     'MB1_AM_L3': './data/LOS_DAMM_MB1_AM_L3.csv',
     'MB1_HM_L51': './data/LOS_DAMM_MB1_HM_L51.csv',
     'MB4_A_D': './data/LOS_DAMM_MB4_A_D.csv',
-    'MB8_A_D': './data/LOS_DAMM_MB8_A_D.csv',
     'MB8_A_D_LS': './data/LOS_DAMM_MB8_A_D_LS.csv',
-    'MB10_A_D': './data/LOS_DAMM_MB10_A_D.csv',
-    'MB10_A_D_LS': './data/LOS_DAMM_MB10_A_D_LS.csv',
+    'MB10_A_D_LS_smoothed': './data/LOS_DAMM_MB10_A_D_LS_smoothed.csv',
     'MB18_A_D': './data/LOS_DAMM_MB18_A_D.csv',
     'UTETEMP': './data/LOS_DAMM_UTETEMP.csv',
     'PRECIP': './data/LOS_DAMM_PRECIP.csv',
+    'LOCAL_INFLOW': './data/LOS_DAMM_LOCAL_INFLOW.csv',
+    'RESERVOIR_TEMP': './data/LOS_DAMM_RESERVOIR_TEMP.csv',
 }
 
 DATASET_MAPPING = {
@@ -33,22 +33,27 @@ DATASET_MAPPING = {
     'GV3': 'MB1_AM_L3',
     'GV51': 'MB1_HM_L51',
     'MB4': 'MB4_A_D',
-    # 'MB8': 'MB8_A_D',
     'MB8': 'MB8_A_D_LS',
-    # 'MB10': 'MB10_A_D',
-    'MB10': 'MB10_A_D_LS',
+    'MB10': 'MB10_A_D_LS_smoothed',
     'MB18': 'MB18_A_D',
-    'T': 'UTETEMP',
-    'T_MA_001': 'derived_temporal', # MA
-    'T_MA_007': 'derived_temporal', # MA
-    'T_MA_014': 'derived_temporal', # MA
-    'T_MA_030': 'derived_temporal', # MA
-    'T_MA_060': 'derived_temporal',
     'P': 'PRECIP',
+    'P_RS_007': 'derived_temporal', # RS = RUNNING SUM
     'P_RS_030': 'derived_temporal', # RS = RUNNING SUM
     'P_RS_060': 'derived_temporal', # RS 
     'P_RS_090': 'derived_temporal', # RS
     'P_RS_180': 'derived_temporal', # RS
+    'Q': 'LOCAL_INFLOW',
+    'Q_RS_007': 'derived_temporal',
+    'Q_RS_030': 'derived_temporal',
+    'TA': 'UTETEMP',
+    'TA_MA_001': 'derived_temporal', # MA
+    'TA_MA_007': 'derived_temporal', # MA
+    'TA_MA_014': 'derived_temporal', # MA
+    'TA_MA_030': 'derived_temporal', # MA
+    'TA_MA_060': 'derived_temporal',
+    'TW': 'RESERVOIR_TEMP',
+    'TW_MA_007': 'derived_temporal',
+    'TW_MA_030': 'derived_temporal',
     'h_poly': 'derived',
     'Sin_s': 'derived', 
     'Cos_s': 'derived',  
@@ -62,6 +67,7 @@ DATASET_MAPPING = {
 }
 
 DERIVED_FEATURE_BASES = {
+    'h_poly': 'h',
     'h_MA_007': 'h',
     'h_MA_014': 'h',
     'h_MA_030': 'h',
@@ -69,16 +75,20 @@ DERIVED_FEATURE_BASES = {
     'h_MA_180': 'h',
     'h_RC_007': 'h',
     'h_RC_030': 'h',
-    'T_MA_001': 'T',
-    'T_MA_007': 'T',
-    'T_MA_014': 'T',
-    'T_MA_030': 'T',
-    'T_MA_060': 'T',
+    'P_RS_007': 'P',
     'P_RS_030': 'P',
     'P_RS_060': 'P',
     'P_RS_090': 'P',
     'P_RS_180': 'P',
-    'h_poly': 'h'
+    'Q_RS_007': 'Q',
+    'Q_RS_030': 'Q',
+    'TA_MA_001': 'TA',
+    'TA_MA_007': 'TA',
+    'TA_MA_014': 'TA',
+    'TA_MA_030': 'TA',
+    'TA_MA_060': 'TA',
+    'TW_MA_007': 'TW',
+    'TW_MA_030': 'TW',
 }
 
 
@@ -335,10 +345,11 @@ def mapping(feature):
 
 
 if __name__ == "__main__":
-    features = ['h_poly', 'h', 'GV1', 'GV1_extrapolation', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18', \
-                 'P', 'T', 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year', \
-                 'h_MA_007', 'h_MA_014', 'h_MA_030', 'h_MA_060', 'h_RC_007', 'h_RC_030', 'T_MA_001', 'T_MA_007', \
-                 'T_MA_030', 'T_MA_060', 'P_RS_030', 'P_RS_060', 'P_RS_090', 'P_RS_180']
+    features = ['h_poly', 'h', 'GV1', 'GV1_extrapolation', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18',
+                 'P', 'TA', 'Q', 'TW', 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year',
+                 'h_MA_007', 'h_MA_014', 'h_MA_030', 'h_MA_060', 'h_RC_007', 'h_RC_030', 'TA_MA_001', 'TA_MA_007',
+                 'TA_MA_030', 'TA_MA_060', 'TW_MA_007', 'TW_MA_030', 'Q_RS_007', 'Q_RS_030', 'P_RS_007', 'P_RS_030', 
+                 'P_RS_060', 'P_RS_090', 'P_RS_180']
     poly_degree = 4
     target = 'GV3'
     start_date = "08-01-2020" #MM-dd-YYYY
