@@ -7,7 +7,6 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 FILE_PATHS = {
     'ÖVY': './data/LOS_DAMM_ÖVY.csv',
     'MB1_AM_L1': './data/LOS_DAMM_MB1_AM_L1.csv',
-    'MB1_AM_L1_extrapolation': './data/LOS_DAMM_MB1_AM_L1_extrapolation.csv',
     'MB1_AM_L3': './data/LOS_DAMM_MB1_AM_L3.csv',
     'MB1_HM_L51': './data/LOS_DAMM_MB1_HM_L51.csv',
     'MB4_A_D': './data/LOS_DAMM_MB4_A_D.csv',
@@ -18,83 +17,84 @@ FILE_PATHS = {
     'PRECIP': './data/LOS_DAMM_PRECIP.csv',
     'LOCAL_INFLOW': './data/LOS_DAMM_LOCAL_INFLOW.csv',
     'RESERVOIR_TEMP': './data/LOS_DAMM_RESERVOIR_TEMP.csv',
+    # Anomaly series
+    'ÖVY_ANOMALY': './data/LOS_DAMM_ÖVY_ANOMALY.csv',
+    'MB4_A_D_ANOMALY': './data/LOS_DAMM_MB4_A_D_ANOMALY.csv',
+    'MB8_A_D_ANOMALY': './data/LOS_DAMM_MB8_A_D_ANOMALY.csv',
+    'MB10_A_D_ANOMALY': './data/LOS_DAMM_MB10_A_D_ANOMALY.csv',
+    'MB18_A_D_ANOMALY': './data/LOS_DAMM_MB18_A_D_ANOMALY.csv',
 }
 
 DATASET_MAPPING = {
-    'h': 'ÖVY',
-    'h_MA_007': 'derived_temporal', # MA = MOVING AVERAGE
-    'h_MA_014': 'derived_temporal', # MA
-    'h_MA_030': 'derived_temporal', # MA
-    'h_MA_060': 'derived_temporal', # MA
-    'h_RC_007': 'derived_temporal', # RC = RATE OF CHANGE
-    'h_RC_030': 'derived_temporal', # RC
     'GV1': 'MB1_AM_L1',
-    'GV1_extrapolation': 'MB1_AM_L1_extrapolation',
     'GV3': 'MB1_AM_L3',
     'GV51': 'MB1_HM_L51',
     'MB4': 'MB4_A_D',
     'MB8': 'MB8_A_D_LS',
     'MB10': 'MB10_A_D_LS_smoothed',
     'MB18': 'MB18_A_D',
+    'h': 'ÖVY',
+    'h_MA_060': 'derived_temporal',  # MA = MOVING AVERAGE
+    'h_MA_180': 'derived_temporal',  # MA
+    'h_RC_007': 'derived_temporal',  # RC = RATE OF CHANGE
+    'h_RC_030': 'derived_temporal',  # RC
     'P': 'PRECIP',
-    'P_RS_007': 'derived_temporal', # RS = RUNNING SUM
-    'P_RS_030': 'derived_temporal', # RS = RUNNING SUM
-    'P_RS_060': 'derived_temporal', # RS 
-    'P_RS_090': 'derived_temporal', # RS
-    'P_RS_180': 'derived_temporal', # RS
+    'P_RS_090': 'derived_temporal',  # RS = RUNNING SUM
+    'P_RS_180': 'derived_temporal',  # RS
     'Q': 'LOCAL_INFLOW',
-    'Q_RS_007': 'derived_temporal',
-    'Q_RS_030': 'derived_temporal',
+    'Q_RS_030': 'derived_temporal',  # RS
+    'Q_RS_120': 'derived_temporal',  # RS
     'TA': 'UTETEMP',
-    'TA_MA_001': 'derived_temporal', # MA
-    'TA_MA_007': 'derived_temporal', # MA
-    'TA_MA_014': 'derived_temporal', # MA
-    'TA_MA_030': 'derived_temporal', # MA
-    'TA_MA_060': 'derived_temporal',
+    'TA_lag_060': 'derived',  # LAG
+    'TA_lag_090': 'derived',  # LAG
+    'TA_lag_120': 'derived',  # LAG
+    'TA_MA_060': 'derived_temporal',  # MA
+    'TA_MA_180': 'derived_temporal',  # MA
     'TW': 'RESERVOIR_TEMP',
-    'TW_MA_007': 'derived_temporal',
-    'TW_MA_030': 'derived_temporal',
+    'TW_MA_120': 'derived_temporal',  # MA
     'h_poly': 'derived',
     'Sin_s': 'derived', 
     'Cos_s': 'derived',  
     'Sin_2s': 'derived',     
     'Cos_2s': 'derived',     
     't': 'derived',       
-    'ln_t': 'derived', 
+    'ln_t': 'derived',
+    'day': 'derived', 
+    'week': 'derived',
     'month': 'derived',
     'year': 'derived',
+    'years_elapsed': 'derived',
     'feature_name': 'dataset_key',
+
+    #anomaly series
+    'h_ANOMALY': 'ÖVY_ANOMALY',
+    'MB4_ANOMALY': 'MB4_A_D_ANOMALY',
+    'MB8_ANOMALY': 'MB8_A_D_ANOMALY',
+    'MB10_ANOMALY': 'MB10_A_D_ANOMALY',
+    'MB18_ANOMALY': 'MB18_A_D_ANOMALY',
 }
 
 DERIVED_FEATURE_BASES = {
     'h_poly': 'h',
-    'h_MA_007': 'h',
-    'h_MA_014': 'h',
-    'h_MA_030': 'h',
     'h_MA_060': 'h',
     'h_MA_180': 'h',
     'h_RC_007': 'h',
     'h_RC_030': 'h',
-    'P_RS_007': 'P',
-    'P_RS_030': 'P',
-    'P_RS_060': 'P',
     'P_RS_090': 'P',
     'P_RS_180': 'P',
-    'Q_RS_007': 'Q',
     'Q_RS_030': 'Q',
-    'TA_MA_001': 'TA',
-    'TA_MA_007': 'TA',
-    'TA_MA_014': 'TA',
-    'TA_MA_030': 'TA',
+    'Q_RS_120': 'Q',
+    'TA_lag_060': 'TA',
+    'TA_lag_090': 'TA',
+    'TA_lag_120': 'TA',
     'TA_MA_060': 'TA',
-    'TW_MA_007': 'TW',
-    'TW_MA_030': 'TW',
+    'TA_MA_180': 'TA',
+    'TW_MA_120': 'TW',
 }
 
 
 def load_and_split_dataset(path, common_start_date=None, common_end_date=None, validation_size=0.2, test_size=0.2):
     """ Helper function ot load, align and interpolate measurements to create one uniform dataset."""
-
     df = pd.read_csv(path, sep=';', parse_dates=['Date-Time']) # Forgot to add sep
     df.set_index('Date-Time', inplace=True)
     df = df.groupby(df.index).mean()  # Aggregate duplicates (daylight saving time change)
@@ -137,7 +137,6 @@ def load_and_split_dataset(path, common_start_date=None, common_end_date=None, v
 
 def load_and_merge_data(features, target, start_date, end_date, validation_size=0.2, test_size=0.2):
     """ Combines all measurements into one dataset."""
-
     datasets_required = set()
     for variable in features + [target]:
         if variable in DATASET_MAPPING:
@@ -244,17 +243,26 @@ def preprocess_data(features, target, start_date, end_date, poly_degree=None, va
         if 'ln_t' in features:
             df_preprocessed['ln_t'] = np.log(df_preprocessed['t'])
     
+    if 'day' in features:
+        df_preprocessed['day'] = df_preprocessed['Date-Time'].dt.dayofyear
+    if 'week' in features:
+        df_preprocessed['week'] = df_preprocessed['Date-Time'].dt.isocalendar().week
     if 'month' in features:
         df_preprocessed['month'] = df_preprocessed['Date-Time'].dt.month
     if 'year' in features:
         df_preprocessed['year'] = df_preprocessed['Date-Time'].dt.year
+    if 'year_elapsed' in features:
+        min_year = df['Date-Time'].dt.year.min()
+        df_preprocessed['year_elapsed'] = df_preprocessed['Date-Time'].dt.year - min_year
+
 
     for feature in features:
         feature_origin = DATASET_MAPPING[feature]
         if feature_origin == 'derived': # Simple derived features
             if '_lag_' in feature:
                 base_var, lag_num = feature.split('_lag_')
-                lag_num = int(lag_num)
+                base_var = DATASET_MAPPING.get(base_var)
+                lag_num = int(lag_num)*24  # Convert lag to days instead of hours
                 df_preprocessed[feature] = df[base_var].shift(lag_num)
             elif feature == 'h_poly' and poly_degree is not None:
                 poly = PolynomialFeatures(degree=poly_degree)
@@ -318,15 +326,12 @@ def split_data_normalized(X, y, test_size=0.2, split_index_from_end=None):
     return X_train_scaled, X_test_scaled, y_train, y_test, split_idx, scaler
 
 
-def split_data_validation(X, y, validation_size=0.2, test_size=0.2, split_index_from_end=None):
+def split_data_validation(X, y, validation_size=0.2, test_size=0.2):
     """ Splits data into train, validation and test 
     WITHOUT normalization."""
 
-    if split_index_from_end:
-        split_idx = len(y) - split_index_from_end
-    else:
-        split_idx_validation = int(len(X) * (1 - test_size - validation_size))
-        split_idx_test = int(len(X) * (1 - test_size))
+    split_idx_validation = int(len(X) * (1 - test_size - validation_size))
+    split_idx_test = int(len(X) * (1 - test_size))
     
     X_train = X.iloc[:split_idx_validation]
     X_val = X.iloc[split_idx_validation:split_idx_test]
@@ -340,18 +345,30 @@ def split_data_validation(X, y, validation_size=0.2, test_size=0.2, split_index_
 
 def mapping(feature):
     """ Returns correctly mapped feature name from original signal."""
-
     return DATASET_MAPPING[feature]
 
 
+def determine_unit(target):
+    """Determine the unit based on the target variable."""
+    return 'MASL' if 'GV' in target else 'L/s' if 'MB' in target else None
+
+
 if __name__ == "__main__":
-    features = ['h_poly', 'h', 'GV1', 'GV1_extrapolation', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18',
-                 'P', 'TA', 'Q', 'TW', 't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 'month', 'year',
-                 'h_MA_007', 'h_MA_014', 'h_MA_030', 'h_MA_060', 'h_RC_007', 'h_RC_030', 'TA_MA_001', 'TA_MA_007',
-                 'TA_MA_030', 'TA_MA_060', 'TW_MA_007', 'TW_MA_030', 'Q_RS_007', 'Q_RS_030', 'P_RS_007', 'P_RS_030', 
-                 'P_RS_060', 'P_RS_090', 'P_RS_180']
+    # features = ['GV1', 'GV3', 'GV51', 'MB4', 'MB8', 'MB10', 'MB18',
+    #             'h_poly', 'h', 'P', 'TA', 'Q', 'TW', 
+    #             't', 'ln_t', 'Cos_s', 'Sin_s', 'Cos_2s', 'Sin_2s', 
+    #             'day', 'month', 'year', 'years_elapsed',
+    #             'h_MA_060', 'h_MA_180', 'h_RC_007', 'h_RC_030',
+    #             'TA_MA_060', 'TA_MA_180',
+    #             'TW_MA_120', 
+    #             'Q_RS_030', 'Q_RS_120', 
+    #             'P_RS_090', 'P_RS_180', 
+    #             'TA_lag_060', 'TA_lag_090', 'TA_lag_120']
+
+    features = ['GV1', 'GV3', 'GV51', 'h_ANOMALY', 'MB4_ANOMALY', 'MB8_ANOMALY','MB10_ANOMALY', 'MB18_ANOMALY']
+    
     poly_degree = 4
-    target = 'GV3'
+    target = 'GV1'
     start_date = "08-01-2020" #MM-dd-YYYY
     end_date = "03-01-2025" #MM-dd-YYYY
     validation_size = 0
@@ -364,7 +381,6 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test, split_idx = split_data(X, y, test_size=test_size)
     print("Data preparation completed.")
 
-
     """ Optional: create a file to write the output""" 
     with open("output.txt", "w") as file:
         # Writing the outputs of X, y, and other variables to the file
@@ -374,18 +390,20 @@ if __name__ == "__main__":
         file.write(str(y) + "\n\n")
         file.write("X_train (Training Features):\n")
         file.write(str(X_train) + "\n\n")
-        # file.write("X_val (Validation Features):\n")
-        # file.write(str(X_val) + "\n\n")
         file.write("X_test (Test Features):\n")
         file.write(str(X_test) + "\n\n")
         file.write("y_train (Training Target):\n")
         file.write(str(y_train) + "\n\n")
-        # file.write("y_val (Validation Target):\n")
-        # file.write(str(y_val) + "\n\n")
         file.write("y_test (Test Target):\n")
         file.write(str(y_test) + "\n\n")
+
+        # file.write("X_val (Validation Features):\n")
+        # file.write(str(X_val) + "\n\n")
+        # file.write("y_val (Validation Target):\n")
+        # file.write(str(y_val) + "\n\n")
         # file.write("Split Index Calidaiton:\n")
         # file.write(str(split_idx_validation) + "\n\n")
         # file.write("Split Index Test):\n")
         # file.write(str(split_idx_test) + "\n\n")
+
     print("Output saved to output.txt")

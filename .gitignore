@@ -1,4 +1,4 @@
-/data
+/data/*
 /.ipynb_checkpoints
 # /visualization/.ipynb_checkpoints
 # /models/__pycache__
